@@ -6,28 +6,19 @@ import { useSession } from 'next-auth/react';
 import SidebarConstumers from '../../../components/Sidebar/SidebarConstumers';
 
 import CustomerList from '../../../components/Constumer/ConstumerList';
+import CustomerAdd from '../../../components/Constumer/ConstumerAdd';
+import CustomerProfile from '../../../components/Constumer/ConstumerProfile'
 
 const DashboardConstumersDashboard = ({ activeButton, }) => {
+
     const { data: session } = useSession();
     switch (activeButton) {
         case 'Customer List':
             return <CustomerList />;
         case 'Add New Customer':
-            return (
-                <div>
-                    <h2 className="text-2xl font-bold">Add New Customer</h2>
-                    <p>Here you can manage your tasks...</p>
-                    {/* Add your task content here */}
-                </div>
-            );
+            return <CustomerAdd />;
         case 'Customer Profile':
-            return (
-                <div>
-                    <h2 className="text-2xl font-bold">Customer Profile</h2>
-                    <p>View the constumer profile.</p>
-                    {/* Add your reports content here */}
-                </div>
-            );
+            return <CustomerProfile />;
         case 'Service History':
             return (
                 <div>
@@ -51,6 +42,9 @@ const DashboardConstumersDashboard = ({ activeButton, }) => {
                         <>
                             <h1 className="text-3xl font-bold">Welcome {session?.user.name}</h1>
                             <p className="mt-4">Welcome to your admin panel. Choose a menu item to get started.</p>
+
+                            
+                            
                         </>
                     ) : (
                         <h1>Login</h1>

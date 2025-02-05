@@ -2,8 +2,7 @@
 import React from 'react';
 import { IoIosSettings } from "react-icons/io";
 import { TbHelpSquareRoundedFilled } from "react-icons/tb";
-import { TbReportSearch } from "react-icons/tb";
-import { MdMoveToInbox ,MdOutbox ,MdGridView,MdOutlineInventory, MdInventory    } from "react-icons/md";
+import { MdMoveToInbox ,MdOutbox ,MdOutlineInventory, MdInventory    } from "react-icons/md";
 
 const SidebarInventory = ({ activeButton, setActiveButton }) => {
 
@@ -27,12 +26,12 @@ const SidebarInventory = ({ activeButton, setActiveButton }) => {
                     {/* in product */}
                     <li>
                         <a
-                            onClick={() => setActiveButton('receive')} // Set activeButton to 'tracking'
-                            className={`${activeButton === 'receive' ? 'active' : ''} sidebar_btn`}
+                            onClick={() => setActiveButton('addstock')} // Set activeButton to 'tracking'
+                            className={`${activeButton === 'addstock' ? 'active' : ''} sidebar_btn`}
 
                         >
                             <MdMoveToInbox  className="mr-2" />
-                            Receive 
+                            Add Stock 
                         </a>
                     </li>
 

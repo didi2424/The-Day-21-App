@@ -4,15 +4,19 @@ export const metadata = {
   description: "Manajement App",
 };
 
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const RootLayout = ({ children }) => {
   return (
     <html lang="en">
+      
       <body>
       
           <main className="app bg-[#f7f7f7] ">
             {children}
           </main>
-
+          <ToastContainer  />
       </body>
     </html>
   );

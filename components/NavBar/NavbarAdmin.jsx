@@ -62,15 +62,7 @@ function NavbarAdmin() {
             </div>
 
             <div className="flex gap-4 items-center ">
-                <input
-                    type="text"
-                    placeholder="Search for a task, order, inventory"
-                    value={searchTerm}
-                    onChange={handleChange}
-                    required
-                    className="search_input peer  md:ml-4 w-full sm:w-72 md:w-70"
-                />
-
+               
                 <div className="iconwrapcircleborder">
                     <IoNotificationsOutline size={24} /> {/* Adjust icon size */}
                 </div>
