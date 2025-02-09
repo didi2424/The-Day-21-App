@@ -142,6 +142,18 @@ const StockAdd = () => {
 
           {/* col 4 */}
           <div className="mt-5 gap-2">
+            <div className="font-sm font-medium">Storage Container</div>
+            <input
+                type="text"
+                name="StrogageContainer"
+                value={formData.StrogageContainer}
+                onChange={handleChange}
+                className="w-full rounded-md bg-[#efefef] p-2"
+              />
+          </div>
+
+          {/* col 5 */}
+          <div className="mt-5 gap-2">
             <div className="font-sm font-medium">Details</div>
             <textarea
               name="Details"
@@ -209,8 +221,8 @@ const StockAdd = () => {
             </div>
           </div>
 
-          <div className="bg-[#f7f7f7] p-4 rounded-md gap-2 ">
-            <p className="text-xl font-bold">Condition</p>
+          <div className="bg-[#f7f7f7] p-4 flex flex-1 flex-col rounded-md gap-2 ">
+            <p className="text-xl font-bold ">Condition</p>
 
             <input
               type="text"
