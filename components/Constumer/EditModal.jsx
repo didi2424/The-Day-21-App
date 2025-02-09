@@ -82,8 +82,8 @@ const EditModal = ({ isModalOpen, closeModal, selectedCustomer }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-lg w-1/2">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-end items-center z-50">
+      <div className="bg-white rounded-lg  w-1/3 h-full p-6 ">
         <h2 className="text-xl font-bold mb-5">Edit Customer</h2>
 
         {/* Name and Phone */}

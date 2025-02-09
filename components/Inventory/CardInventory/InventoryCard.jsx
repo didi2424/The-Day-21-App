@@ -15,8 +15,8 @@ const InventoryCard = ({ title, subTitle, stock, price, quantity, brands }) => {
 
       <div>
         <div className="flex justify-between">
-          <div className="flex mt-6 font-light text-sm">Stock</div>
-          <div className="flex mt-6 font-light text-sm">{price}</div>
+          <div className="flex mt-4 font-light text-sm">Stock</div>
+          <div className="flex mt-4 font-light text-sm">{price}</div>
         </div>
         <div className="flex font-medium text-2xl">{quantity} pcs</div>
       </div>

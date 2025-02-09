@@ -121,6 +121,22 @@ const CustomerAdd = () => {
   
       // Success - redirect to customer list
       toast.success("Customer successfully added!");
+      setFormData({
+        firstName: "",
+        lastName: "",
+        phoneNumber: "",
+        company: "",
+        organisation: "",
+        street: "",
+        city: "",
+        kecamatan: "",
+        kabupaten: "",
+        province: "",
+        postalCode: "",
+      });
+  
+      // Optionally reset form validity state if you have additional logic for it
+      setIsFormValid(false);
     } catch (error) {
       toast.error(`Error: ${error.message}`);
     }

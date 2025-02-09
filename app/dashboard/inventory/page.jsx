@@ -5,10 +5,11 @@ import Provider from "@components/Provider";
 import { useSession } from "next-auth/react";
 import SidebarInventory from "../../../components/Sidebar/SidebarInventory";
 import InventoryCard from "../../../components/Inventory/CardInventory/InventoryCard"; // Adjust path if necessary
-import StockList from "../../../components/Inventory/StockList"
-import AddNewStock from "../../../components/Inventory/AddNewStock";
+import Stock from "../../../components/Inventory/Stock"
+import StockAdd from "../../../components/Inventory/StockAdd";
 
 import SvgIcon from "../../../components/Inventory/Drawyer/Drawyer5x5";
+
 const DashboardInvetoryContent = ({ activeButton }) => {
   const { data: session } = useSession();
   const inventoryData = [
@@ -52,11 +53,11 @@ const DashboardInvetoryContent = ({ activeButton }) => {
   switch (activeButton) {
     case "stock":
       return (
-        <StockList/>
+        <Stock/>
       );
     case "addstock":
       return (
-        <AddNewStock/>
+        <StockAdd/>
       );
     case "issue":
       return (
@@ -184,7 +185,7 @@ function inventory() {
     <Provider>
       <div className="h-screen flex flex-col w-full">
         {/* Navbar */}
-        <header className="pl-4 pr-4">
+        <header className="p-4">
           <NavbarAdmin />
         </header>
         <div className="justify-between flex pr-4 pl-4">
