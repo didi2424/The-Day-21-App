@@ -19,6 +19,6 @@ export const GET = async (request) => {
     );
   } catch (error) {
     console.error(error);
-    return new Response("Failed to fetch customers", { status: 500 });
+    return new Response("Failed to fetch inventory", { status: 500 });
   }
 };

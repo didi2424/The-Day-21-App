@@ -12,6 +12,13 @@ export const POST = async (request) => {
     datasheet,
     category,
     subcategory,
+    stock,
+    sku,
+    stroage,
+    condition,
+    row,
+    column,
+
   } = await request.json();  // Ambil data dari frontend
 
   try {
@@ -38,6 +45,12 @@ export const POST = async (request) => {
       datasheet,
       category,
       subcategory,
+      stock,
+      sku,
+      condition,
+      stroage,
+      row,
+      column,
     });
 
     // Simpan ke database

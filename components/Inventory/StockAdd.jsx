@@ -1,17 +1,25 @@
 import { useState } from "react"; // Make sure to import useState
+import { toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const StockAdd = () => {
+ 
   const [formData, setFormData] = useState({
-    ProductName: "",
-    Price: "",
-    Manufacture: "",
-    Category: "",
-    SubCategory: "",
-    PackageType: "",
-    Details: "",
-    Stock: "",
-    SKU: "",
-    Condition: "",
+    name: "",
+    marking:"",
+    manufacture: "",
+    price: "",
+    packagetype: "",
+    subcategory: "",
+    category: "",
+    description: "",
+    stock: "",
+    sku: "",
+    condition: "",
+    stroage: "",
+    row: "",
+    column: "",
   });
 
   const handleChange = (e) => {
@@ -21,20 +29,79 @@ const StockAdd = () => {
       [name]: value,
     }));
   };
+  const validateForm = () => {
+    const requiredFields = [
+      "name", "price", "marking", "category", "subcategory", "packagetype", "stock"
+    ];
 
+    for (let field of requiredFields) {
+      if (!formData[field]) {
+        toast.error(`${field.charAt(0).toUpperCase() + field.slice(1)} harus diisi terlebih dahulu`, {
+          position: "bottom-right",
+          autoClose: 5000, // Close after 5 seconds
+          hideProgressBar: false,  // Show progress bar
+          closeOnClick: true,  // Allow closing the toast by clicking
+        });
+        return false;
+      }
+    }
+
+    return true; // Form is valid
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Log the formData to the console
-    console.log(formData);
+    if (!validateForm()) {
+      return; // Don't submit if validation fails
+    }
 
     // Optionally, you can still handle any error messages
     try {
-      // You can remove the fetch part if you're just logging the data
+      // Send formData to the backend
+      const response = await fetch('/api/inventory/new/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData), // Send the formData as a JSON string
+      });
+  
+      // Check if the response was successful
+      if (response.ok) {
+        toast.success("Product Berhasil Disimpan", {
+          position: "bottom-right",
+          autoClose: 2000, // Close after 5 seconds
+          hideProgressBar: false,  // Show progress bar
+          closeOnClick: true,  // Allow closing the toast by clicking
+        });
+    
+      } else if (response.status === 409) {
+        // Handle case where the product already exists
+        toast.error("Product sudah ada dalam inventory", {
+          position: "bottom-right",
+          autoClose: 2000, // Close after 5 seconds
+          hideProgressBar: false,  // Show progress bar
+          closeOnClick: true,  // Allow closing the toast by clicking
+        });
+      } else {
+        // Handle other errors
+        toast.error("Inventory Tidak Dapat Di input", {
+          position: "bottom-right",
+          autoClose: 2000, // Close after 5 seconds
+          hideProgressBar: false,  // Show progress bar
+          closeOnClick: true,  // Allow closing the toast by clicking
+        });
+      }
     } catch (error) {
-      toast.error(`Error: ${error.message}`);
+      toast.error("Inventory Tidak Dapat Di input", {
+        position: "bottom-right",
+        autoClose: 2000, // Close after 5 seconds
+        hideProgressBar: false,  // Show progress bar
+        closeOnClick: true,  // Allow closing the toast by clicking
+      });
     }
-  };
+};
+
   return (
     <div>
       <div className="flex flex-1 justify-between items-center">
@@ -51,8 +118,8 @@ const StockAdd = () => {
             <div className="font-sm font-medium mt-2">Product Name</div>
             <input
               type="text"
-              name="ProductName"
-              value={formData.ProductName}
+              name="name"
+              value={formData.name}
               onChange={handleChange}
               className="w-full rounded-md bg-[#efefef] p-2"
             />
@@ -63,9 +130,9 @@ const StockAdd = () => {
               <div className="font-sm font-medium">Price</div>
               <input
                 type="text"
-                name="Price"
-                placeholder="Price"
-                value={formData.Price}
+                name="price"
+                placeholder="price"
+                value={formData.price}
                 onChange={handleChange}
                 className="w-full rounded-md bg-[#efefef] p-2"
               />
@@ -75,9 +142,9 @@ const StockAdd = () => {
               <div className="font-sm font-medium">Manufacture</div>
               <select
                 id="category"
-                value={formData.Manufacture} // Make sure to bind the selected value to formData.Category
+                value={formData.manufacture} // Make sure to bind the selected value to formData.Category
                 onChange={(e) => handleChange(e)}
-                name="Manufacture"
+                name="manufacture"
                 className="w-full rounded-md bg-[#efefef] p-2"
               >
                 <option className="text-sm" value="Alpha & Omega">
@@ -107,22 +174,35 @@ const StockAdd = () => {
           {/* col 3 */}
           <div className="flex flex-1 justify-between gap-4 mt-3">
             <div className="flex flex-col w-1/2 gap-2">
-              <div className="font-sm font-medium">Category</div>
+              <div className="font-sm font-medium">Marking</div>
               <input
                 type="text"
-                name="Category"
-                value={formData.Category}
+                name="marking"
+                value={formData.marking}
                 onChange={handleChange}
                 className="w-full rounded-md bg-[#efefef] p-2"
               />
             </div>
 
             <div className="flex flex-col w-1/2 gap-2">
+              <div className="font-sm font-medium">Category</div>
+              <input
+                type="text"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="w-full rounded-md bg-[#efefef] p-2"
+              />
+            </div>
+
+            
+
+            <div className="flex flex-col w-1/2 gap-2">
               <div className="font-sm font-medium">Sub Category</div>
               <input
                 type="text"
-                name="SubCategory"
-                value={formData.SubCategory}
+                name="subcategory"
+                value={formData.subcategory}
                 onChange={handleChange}
                 className="w-full rounded-md bg-[#efefef] p-2"
               />
@@ -132,8 +212,8 @@ const StockAdd = () => {
               <div className="font-sm font-medium">Package Type</div>
               <input
                 type="text"
-                name="PackageType"
-                value={formData.PackageType}
+                name="packagetype"
+                value={formData.packagetype}
                 onChange={handleChange}
                 className="w-full rounded-md bg-[#efefef] p-2"
               />
@@ -141,23 +221,55 @@ const StockAdd = () => {
           </div>
 
           {/* col 4 */}
-          <div className="mt-5 gap-2">
-            <div className="font-sm font-medium">Storage Container</div>
-            <input
+          <div className="flex flex-1 gap-3 mt-3">
+            {/* Storage input takes full width */}
+            <div className="flex flex-1 flex-col">
+              <p className="font-sm font-medium">Storage</p>
+              <input
                 type="text"
-                name="StrogageContainer"
-                value={formData.StrogageContainer}
+                name="stroage"
+                value={formData.stroage}
                 onChange={handleChange}
+                placeholder="Storage"
                 className="w-full rounded-md bg-[#efefef] p-2"
               />
+            </div>
+
+            <div className="flex flex-1 gap-3">
+            <div className="flex flex-1 flex-col">
+              <p className="font-sm font-medium">Row</p>
+              <input
+                type="text"
+                name="row"
+                value={formData.row}
+                onChange={handleChange}
+                placeholder="Row"
+                className="w-full rounded-md bg-[#efefef] p-2"
+              />
+            </div>
+
+            {/* Column input takes 1/3 of the container's width */}
+            <div className="flex flex-1 flex-col">
+              <p className="font-sm font-medium">Column</p>
+              <input
+                type="text"
+                name="column"
+                value={formData.column}
+                onChange={handleChange}
+                placeholder="Column"
+                className="w-full rounded-md bg-[#efefef] p-2"
+              />
+            </div>
+
+            </div>
           </div>
 
           {/* col 5 */}
           <div className="mt-5 gap-2">
             <div className="font-sm font-medium">Details</div>
             <textarea
-              name="Details"
-              value={formData.Details}
+              name="description"
+              value={formData.description}
               onChange={handleChange}
               className="w-full rounded-md bg-[#efefef] p-2 mt-2"
               rows="6"
@@ -199,8 +311,8 @@ const StockAdd = () => {
                 <p>Stock</p>
                 <input
                   type="text"
-                  name="Stock"
-                  value={formData.Stock}
+                  name="stock"
+                  value={formData.stock}
                   onChange={handleChange}
                   placeholder="Stock"
                   className="w-full rounded-md bg-[#efefef] p-2"
@@ -211,8 +323,8 @@ const StockAdd = () => {
                 <p>Stock Keep Unit (SKU)</p>
                 <input
                   type="text"
-                  name="SKU"
-                  value={formData.SKU}
+                  name="sku"
+                  value={formData.sku}
                   onChange={handleChange}
                   placeholder="optional"
                   className="w-full rounded-md bg-[#efefef] p-2"
@@ -226,9 +338,9 @@ const StockAdd = () => {
 
             <input
               type="text"
-              name="Condition"
+              name="condition"
               placeholder="optional"
-              value={formData.Condition}
+              value={formData.condition}
               onChange={handleChange}
               className="w-full rounded-md bg-[#efefef] p-2"
             />
@@ -239,6 +351,7 @@ const StockAdd = () => {
           >
             Save
           </div>
+         
         </div>
       </div>
 
