@@ -1,75 +1,156 @@
-import { useState, useEffect } from "react"; // Import useState and useEffect
+import { useState, useEffect } from "react";
+import EditModal from "./EditModal";
 
 const Stock = () => {
-  // State to store the inventory list
   const [inventory, setInventory] = useState([]);
-
-  // State to handle loading state and error state
+  const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch inventory list when the component mounts
+  const [isModalOpen, setIsModalOpen] = useState(false); // To toggle the modal visibility
+  const [selectedInventory, setSelectedInventory] = useState(null); 
+
+  const handleEdit = (item) => {
+    setSelectedInventory(item); // Set the customer to be edited
+    setIsModalOpen(true); // Open the modal
+    console.log("open modal edit", item)
+  };
+  
+  const closeModal = () => {
+    setIsModalOpen(false); // Close the modal
+    setSelectedInventory(null); // Clear the selected customer
+  };
+
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await fetch("/api/inventory/getimages");
+        if (!response.ok) {
+          throw new Error("Gagal mengambil gambar.");
+        }
+        const data = await response.json();
+        setImages(data);
+      } catch (error) {
+        console.error("Error fetching images:", error);
+        setError(error.message);
+      }
+    };
+    fetchImages();
+  }, []);
+
   useEffect(() => {
     const fetchInventory = async () => {
       try {
-        // Make the GET request to the API
-        const response = await fetch('/api/inventory');
-        
+        const response = await fetch("/api/inventory");
         if (!response.ok) {
-          throw new Error('Failed to fetch inventory');
+          throw new Error("Failed to fetch inventory");
         }
-    
         const data = await response.json();
-        console.log(data);  // Log the response to confirm it's structured correctly
-    
-        // Access 'inventory' from the response object and set the state
-        setInventory(data.inventory);  // Correctly accessing the inventory array
-    
+        setInventory(data.inventory || []);
       } catch (error) {
-        setError(error.message); // Set error message if something goes wrong
+        console.error("Error fetching inventory:", error);
+        setError(error.message);
       } finally {
-        setLoading(false); // Set loading to false after the fetch is complete
+        setLoading(false);
       }
     };
+    fetchInventory();
+  }, []);
 
-    fetchInventory(); // Call the function to fetch the inventory
-  }, []); // Empty dependency array to run this effect only once when component mounts
+  const getImagesForItem = (imageNames) => {
+    if (!imageNames) return [];
+    const imageArray = Array.isArray(imageNames) ? imageNames : [imageNames];
+    const matchedImages = images
+      .flatMap((img) => img.images)
+      .filter((img) => imageArray.includes(img.imageName));
 
-  if (loading) {
-    return <div>Loading...</div>; // Show loading indicator while data is being fetched
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>; // Show error message if fetching failed
-  }
+    return matchedImages;
+  };
 
   return (
-    <div>
+    
+    <div >
       <div className="flex flex-1 justify-between items-center">
-        <h2 className="text-2xl font-bold">Stock List</h2>
+        <h2 className="text-2xl font-bold mb-4">Stock List</h2>
       </div>
+      {inventory.length > 0 ? (
+        <ul>
+          {inventory.map((item) => {
+            const matchedImages = getImagesForItem(item.imagesnames);
 
+            return (
+              <li key={item.id || item._id} className="mb-2">
+                <div className="p-4 shadow-sm rounded-md border">
+                  <div className="grid grid-cols-8 gap-2 items-center ">
+                    {/* Nama */}
 
-      {/* Display the inventory list */}
-      <div className="mt-4">
-        {inventory.length > 0 ? (
-          <ul>
-            {inventory.map((item) => (
-              <li key={item.id} className="mb-2">
-                <div className="flex flex-col p-2 border border-gray-300 rounded-md">
-                  <div className="font-bold">{item.name}</div>
-                  <div>Price: {item.price}</div>
-                  <div>Category: {item.category}</div>
-                  <div>Stock: {item.stock}</div>
+                    <div>
+                      <div className="font-bold text-lg">{item.name}</div>
+                      <div>
+                        Price: Rp.
+                        {new Intl.NumberFormat("id-ID").format(item.price)},-
+                      </div>
+                    </div>
+
+                    {/* Stok */}
+                    <div>Stock: {item.stock}</div>
+
+                    {/* Penyimpanan & Lokasi */}
+                    <div>
+                      <div>Stroage: {item.stroage}</div>
+                      <div>
+                        Row Column: R{item.row} C{item.column}
+                      </div>
+                    </div>
+
+                    {/* Manufaktur & Kategori */}
+                    <div>
+                      <div>{item.manufacture}</div>
+                      <div>Category: {item.category}</div>
+                    </div>
+
+                    {/* Manufaktur & Kategori */}
+                    <div>
+                      <div>SKU: {item.sku}</div>
+                      <div>Condition: {item.condition}</div>
+                    </div>
+
+                    <div className="flex gap-5">
+                      <button className="text-white font-bold text-sm border bg-black rounded-md pt-1 pb-1 pl-2 pr-2">Description</button>
+
+                      <button onClick={() => handleEdit(item)} className="text-white font-bold text-sm border bg-green-400 rounded-md pt-1 pb-1 pl-2 pr-2">Edit</button>
+                    </div>
+
+                    {/* Gambar */}
+                    <div className="flex space-x-2">
+                      {matchedImages.length > 0 ? (
+                        matchedImages.map((img, index) => (
+                          <img
+                            key={`${item._id}-${index}`}
+                            src={img.imageData}
+                            alt={img.imageName}
+                            className="w-20 h-20 object-cover rounded-md"
+                          />
+                        ))
+                      ) : (
+                        <p className="text-gray-500 text-sm">
+                          No images available
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No inventory items available</p>
-        )}
-      </div>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="text-gray-500">No inventory items available</p>
+      )}
+       {isModalOpen && <EditModal isModalOpen={isModalOpen} closeModal={closeModal} selectedInventory={selectedInventory} />}
     </div>
+    
   );
 };
 

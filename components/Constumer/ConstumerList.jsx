@@ -14,7 +14,6 @@ const CustomerList = () => {
   const [totalPages, setTotalPages] = useState(1); // Total number of pages
 
   const [isModalOpen, setIsModalOpen] = useState(false); // To toggle the modal visibility
-  const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false)
 
   const [selectedCustomer, setSelectedCustomer] = useState(null); // To store the selected customer for editing
   

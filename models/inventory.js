@@ -16,6 +16,7 @@ const InventorySchema = new Schema({
   stroage : { type: String, required: true }, 
   row: { type: String, required: true }, 
   column: { type: String, required: true },
+  imagesnames: [{ type: String, required: false }],
 });
 
 const Inventory = models.Inventory || model('Inventory', InventorySchema);

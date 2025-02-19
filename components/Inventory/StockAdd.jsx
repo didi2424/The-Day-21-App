@@ -1,13 +1,12 @@
 import { useState } from "react"; // Make sure to import useState
 import { toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
-
+import "react-toastify/dist/ReactToastify.css";
+import Image from "next/image";
 
 const StockAdd = () => {
- 
   const [formData, setFormData] = useState({
     name: "",
-    marking:"",
+    marking: "",
     manufacture: "",
     price: "",
     packagetype: "",
@@ -20,7 +19,13 @@ const StockAdd = () => {
     stroage: "",
     row: "",
     column: "",
+    imagesnames: [],
   });
+
+  const [mainImage, setMainImage] = useState(null);
+  const [additionalImages, setAdditionalImages] = useState([]);
+  const [mainImageBase64, setMainImageBase64] = useState("");
+  const [additionalImagesBase64, setAdditionalImagesBase64] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,79 +34,128 @@ const StockAdd = () => {
       [name]: value,
     }));
   };
-  const validateForm = () => {
-    const requiredFields = [
-      "name", "price", "marking", "category", "subcategory", "packagetype", "stock"
-    ];
 
-    for (let field of requiredFields) {
-      if (!formData[field]) {
-        toast.error(`${field.charAt(0).toUpperCase() + field.slice(1)} harus diisi terlebih dahulu`, {
-          position: "bottom-right",
-          autoClose: 5000, // Close after 5 seconds
-          hideProgressBar: false,  // Show progress bar
-          closeOnClick: true,  // Allow closing the toast by clicking
-        });
-        return false;
-      }
+  // Konversi gambar ke Base64
+  const convertToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const handleMainImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const base64 = await convertToBase64(file);
+      setMainImage(URL.createObjectURL(file));
+      setMainImageBase64(base64);
+    }
+  };
+
+  const handleAdditionalImageUpload = async (event) => {
+    const files = Array.from(event.target.files);
+
+    if (files.length + additionalImages.length <= 3) {
+      const newPreviews = files.map((file) => URL.createObjectURL(file));
+      const newBase64Images = await Promise.all(
+        files.map((file) => convertToBase64(file))
+      );
+
+      setAdditionalImages((prev) => [...prev, ...newPreviews]);
+      setAdditionalImagesBase64((prev) => [...prev, ...newBase64Images]);
+    }
+  };
+
+  const handleUploadImage = async () => {
+    if (!mainImageBase64) {
+      toast.error("Harap unggah gambar utama sebelum menyimpan produk.");
+      return null;
     }
 
-    return true; // Form is valid
+    try {
+      const imageUploads = await Promise.all(
+        [mainImageBase64, ...additionalImagesBase64].map(async (base64) => {
+          const response = await fetch("/api/inventory/newimage", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: base64 }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Gagal mengunggah gambar.");
+          }
+
+          const data = await response.json();
+          return data.imageName;
+        })
+      );
+      toast.success("Semua gambar berhasil diunggah.");
+
+      return imageUploads;
+    } catch (error) {
+      console.error("Upload Error:", error);
+      toast.error("Terjadi kesalahan saat mengunggah gambar.");
+      return null;
+    }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return; // Don't submit if validation fails
+    const uploadedNames = await handleUploadImage();
+    if (!uploadedNames || uploadedNames.length === 0) {
+      toast.error("Harap unggah gambar terlebih dahulu.");
+      return;
     }
 
-    // Optionally, you can still handle any error messages
+    const finalFormData = {
+      ...formData,
+      imagesnames: uploadedNames,
+    };
+
+    console.log("Final Form Data:", finalFormData);
+
     try {
-      // Send formData to the backend
-      const response = await fetch('/api/inventory/new/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData), // Send the formData as a JSON string
+      const response = await fetch("/api/inventory/new/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(finalFormData),
       });
-  
-      // Check if the response was successful
+
       if (response.ok) {
-        toast.success("Product Berhasil Disimpan", {
-          position: "bottom-right",
-          autoClose: 2000, // Close after 5 seconds
-          hideProgressBar: false,  // Show progress bar
-          closeOnClick: true,  // Allow closing the toast by clicking
+        toast.success("Produk berhasil disimpan.");
+        setFormData({
+          name: "",
+          marking: "",
+          manufacture: "",
+          price: "",
+          packagetype: "",
+          subcategory: "",
+          category: "",
+          description: "",
+          stock: "",
+          sku: "",
+          condition: "",
+          stroage: "",
+          row: "",
+          column: "",
+          imagesnames: [],
         });
-    
+        setMainImage(null);
+        setAdditionalImages([]);
+        setMainImageBase64("");
+        setAdditionalImagesBase64([]);
       } else if (response.status === 409) {
-        // Handle case where the product already exists
-        toast.error("Product sudah ada dalam inventory", {
-          position: "bottom-right",
-          autoClose: 2000, // Close after 5 seconds
-          hideProgressBar: false,  // Show progress bar
-          closeOnClick: true,  // Allow closing the toast by clicking
-        });
+        toast.error("Produk sudah ada dalam inventory.");
       } else {
-        // Handle other errors
-        toast.error("Inventory Tidak Dapat Di input", {
-          position: "bottom-right",
-          autoClose: 2000, // Close after 5 seconds
-          hideProgressBar: false,  // Show progress bar
-          closeOnClick: true,  // Allow closing the toast by clicking
-        });
+        toast.error("Gagal menyimpan produk.");
       }
     } catch (error) {
-      toast.error("Inventory Tidak Dapat Di input", {
-        position: "bottom-right",
-        autoClose: 2000, // Close after 5 seconds
-        hideProgressBar: false,  // Show progress bar
-        closeOnClick: true,  // Allow closing the toast by clicking
-      });
+      toast.error("Kesalahan server, coba lagi nanti.");
     }
-};
-
+  };
   return (
     <div>
       <div className="flex flex-1 justify-between items-center">
@@ -121,7 +175,8 @@ const StockAdd = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full rounded-md bg-[#efefef] p-2"
+              placeholder="Input Name"
+              className="w-full rounded-md bg-[#efefef] p-2 shadow-sm"
             />
           </div>
           {/* col 2 */}
@@ -129,9 +184,9 @@ const StockAdd = () => {
             <div className="flex flex-col w-1/2 gap-2">
               <div className="font-sm font-medium">Price</div>
               <input
-                type="text"
+                type="number"
                 name="price"
-                placeholder="price"
+                placeholder="Input Price"
                 value={formData.price}
                 onChange={handleChange}
                 className="w-full rounded-md bg-[#efefef] p-2"
@@ -195,8 +250,6 @@ const StockAdd = () => {
               />
             </div>
 
-            
-
             <div className="flex flex-col w-1/2 gap-2">
               <div className="font-sm font-medium">Sub Category</div>
               <input
@@ -236,31 +289,30 @@ const StockAdd = () => {
             </div>
 
             <div className="flex flex-1 gap-3">
-            <div className="flex flex-1 flex-col">
-              <p className="font-sm font-medium">Row</p>
-              <input
-                type="text"
-                name="row"
-                value={formData.row}
-                onChange={handleChange}
-                placeholder="Row"
-                className="w-full rounded-md bg-[#efefef] p-2"
-              />
-            </div>
+              <div className="flex flex-1 flex-col">
+                <p className="font-sm font-medium">Row</p>
+                <input
+                  type="number"
+                  name="row"
+                  value={formData.row}
+                  onChange={handleChange}
+                  placeholder="Row"
+                  className="w-full rounded-md bg-[#efefef] p-2"
+                />
+              </div>
 
-            {/* Column input takes 1/3 of the container's width */}
-            <div className="flex flex-1 flex-col">
-              <p className="font-sm font-medium">Column</p>
-              <input
-                type="text"
-                name="column"
-                value={formData.column}
-                onChange={handleChange}
-                placeholder="Column"
-                className="w-full rounded-md bg-[#efefef] p-2"
-              />
-            </div>
-
+              {/* Column input takes 1/3 of the container's width */}
+              <div className="flex flex-1 flex-col">
+                <p className="font-sm font-medium">Column</p>
+                <input
+                  type="number"
+                  name="column"
+                  value={formData.column}
+                  onChange={handleChange}
+                  placeholder="Column"
+                  className="w-full rounded-md bg-[#efefef] p-2"
+                />
+              </div>
             </div>
           </div>
 
@@ -271,6 +323,7 @@ const StockAdd = () => {
               name="description"
               value={formData.description}
               onChange={handleChange}
+              placeholder="Input Details. ie, This is a PWM Controller....."
               className="w-full rounded-md bg-[#efefef] p-2 mt-2"
               rows="6"
             />
@@ -279,28 +332,55 @@ const StockAdd = () => {
 
         {/* right menu */}
         <div className="flex flex-1 flex-col mt-4 w-[40%] gap-4">
-          <div className="bg-[#f7f7f7] p-4 rounded-md">
-            <p className="text-xl font-bold">Pictures</p>
-
-            <div className="grid grid-cols-4 gap-4 justify-items-center items-center">
-              {/* p0 will take 2 columns, centered horizontally and vertically */}
-              <div className="bg-[#efefef] col-span-2 h-45 w-45">p0</div>
-
-              {/* p1, p2, p3 are stacked vertically, centered in their container */}
-              <div className="flex flex-col gap-2 justify-center items-center">
-                <div className="bg-[#efefef] h-16 w-16 flex items-center justify-center">
-                  p1
-                </div>
-                <div className="bg-[#efefef] h-16 w-16 flex items-center justify-center">
-                  p2
-                </div>
-                <div className="bg-[#efefef] h-16 w-16 flex items-center justify-center">
-                  p3
-                </div>
+          <div className="bg-[#f7f7f7] p-4 rounded-lg  ">
+            <h2 className="text-lg font-bold mb-2">Product Images</h2>
+            <div className="flex p-4 gap-2 justify-center">
+              <label className="w-48 h-48 bg-gray-300 flex items-center justify-center cursor-pointer overflow-hidden rounded-md">
+                {mainImage ? (
+                  <Image
+                    src={mainImage}
+                    alt="Main"
+                    width={200}
+                    height={200}
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <span className="text-gray-600">Add Images</span>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleMainImageUpload}
+                />
+              </label>
+              <div className="flex flex-col gap-2">
+                {[...Array(3)].map((_, index) => (
+                  <label
+                    key={index}
+                    className="w-16 h-16 bg-gray-300 flex items-center justify-center cursor-pointer overflow-hidden"
+                  >
+                    {additionalImages[index] ? (
+                      <Image
+                        src={additionalImages[index]}
+                        alt={`Additional ${index}`}
+                        width={64}
+                        height={64}
+                        className="object-cover w-full h-full rounded-md"
+                      />
+                    ) : (
+                      <span className="text-gray-600">+</span>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAdditionalImageUpload}
+                    />
+                  </label>
+                ))}
               </div>
             </div>
-
-            <button className="mt-2 black_btn"> Upload</button>
           </div>
 
           <div className="bg-[#f7f7f7] rounded-md p-4">
@@ -310,7 +390,7 @@ const StockAdd = () => {
               <div className="flex flex-1 flex-col">
                 <p>Stock</p>
                 <input
-                  type="text"
+                  type="number"
                   name="stock"
                   value={formData.stock}
                   onChange={handleChange}
@@ -336,14 +416,20 @@ const StockAdd = () => {
           <div className="bg-[#f7f7f7] p-4 flex flex-1 flex-col rounded-md gap-2 ">
             <p className="text-xl font-bold ">Condition</p>
 
-            <input
-              type="text"
+            <select
+              id="condition"
+              value={formData.condition} // Make sure to bind the selected value to formData.Category
+              onChange={(e) => handleChange(e)}
               name="condition"
-              placeholder="optional"
-              value={formData.condition}
-              onChange={handleChange}
               className="w-full rounded-md bg-[#efefef] p-2"
-            />
+            >
+              <option className="text-sm" value="New">
+                New
+              </option>
+              <option className="text-sm" value="Refurbished">
+                Refurbished
+              </option>
+            </select>
           </div>
           <div
             className="topactive_btn inline-flex items-center justify-center px-4 py-2 rounded-md text-center cursor-pointer mt-4 max-w-max"
@@ -351,7 +437,6 @@ const StockAdd = () => {
           >
             Save
           </div>
-         
         </div>
       </div>
 

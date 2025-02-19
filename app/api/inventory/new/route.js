@@ -18,14 +18,13 @@ export const POST = async (request) => {
     condition,
     row,
     column,
+    imagesnames
 
-  } = await request.json();  // Ambil data dari frontend
+  } = await request.json();  
 
   try {
-    // Connect ke database MongoDB
     await connectToDB();
 
-    // Cek apakah produk sudah ada
     const existingProduct = await Inventory.findOne({ name });
     if (existingProduct) {
       return new Response(
@@ -34,7 +33,6 @@ export const POST = async (request) => {
       );
     }
 
-    // Membuat document baru untuk Inventory
     const newInventory = new Inventory({
       name,
       marking,
@@ -51,12 +49,11 @@ export const POST = async (request) => {
       stroage,
       row,
       column,
+      imagesnames
     });
 
-    // Simpan ke database
     await newInventory.save();
 
-    // Kirim respons jika berhasil disimpan
     return new Response(JSON.stringify(newInventory), { status: 201 });
   } catch (error) {
     console.error(error);

@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "date-fns": "^4.1.0",
-    "mongoose": "^8.9.5",
+    "formidable": "^3.5.2",
+    "gridfs-stream": "^1.1.1",
+    "mongoose": "^8.10.1",
     "next": "15.1.6",
     "next-auth": "^4.24.11",
     "react": "^19.0.0",
