@@ -51,13 +51,13 @@ const CustomerList = () => {
   };
 
   const handleEdit = (customer) => {
-    setSelectedCustomer(customer); // Set the customer to be edited
-    setIsModalOpen(true); // Open the modal
+    setSelectedCustomer(customer); 
+    setIsModalOpen(true); 
   };
 
   const closeModal = () => {
-    setIsModalOpen(false); // Close the modal
-    setSelectedCustomer(null); // Clear the selected customer
+    setIsModalOpen(false);
+    setSelectedCustomer(null); 
   };
 
   const fetchCustomers = async () => {
@@ -67,8 +67,6 @@ const CustomerList = () => {
         throw new Error('Failed to fetch customers');
       }
       const data = await response.json();
-
-      // Update the state with customers and pagination info
       setCustomers(data.customers);
       setTotalCustomers(data.totalCustomers);
       setTotalPages(Math.ceil(data.totalCustomers / pageSize));
@@ -81,7 +79,12 @@ const CustomerList = () => {
 
   useEffect(() => {
     fetchCustomers();
-  }, [currentPage]); // Re-fetch customers when currentPage changes
+  }, [currentPage]); 
+
+
+  const refreshData = () => {
+    fetchCustomers();
+  };
 
   const handleNext = () => {
     if (currentPage < totalPages) {
@@ -139,7 +142,6 @@ const CustomerList = () => {
                       {customer.constumer_address.street}, {customer.constumer_address.city},  {customer.constumer_address.kecamatan},  {customer.constumer_address.kabupaten},  {customer.constumer_address.province},  {customer.constumer_address.postal_code}
                     </div>
                   )}
-
                 </div>
 
                 {/* Date Section */}
@@ -152,7 +154,7 @@ const CustomerList = () => {
                   </p>
                 </div>
 
-                {/* Action Section */}
+                {/* Action Button Section */}
                 <div className="flex-1 flex gap-10 items-center">
                   <p className="font-inter text-sm cursor-pointer" onClick={() => handleEdit(customer)}>
                     Edit
@@ -167,7 +169,7 @@ const CustomerList = () => {
         )}
       </ul>
 
-      {/* Pagination Buttons */}
+
       <div className="flex justify-between mt-4">
         <p className="mt-2 text-sm">Page {currentPage} of {totalPages}</p>
         <div className='gap-4 flex'>
@@ -180,7 +182,7 @@ const CustomerList = () => {
         </div>
       </div>
 
-      {isModalOpen && <EditModal isModalOpen={isModalOpen} closeModal={closeModal} selectedCustomer={selectedCustomer} />}
+      {isModalOpen && <EditModal isModalOpen={isModalOpen} closeModal={closeModal} selectedCustomer={selectedCustomer} refreshData={refreshData} />}
     </div>
   );
 };

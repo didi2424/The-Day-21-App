@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 
-const EditModal = ({ isModalOpen, closeModal, selectedCustomer }) => {
+const EditModal = ({ isModalOpen, closeModal, selectedCustomer, refreshData }) => {
   if (!isModalOpen || !selectedCustomer) return null;
 
   const [formData, setFormData] = useState({
@@ -35,7 +35,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedCustomer }) => {
     }
   }, [selectedCustomer]);
 
-  // Fungsi untuk menangani perubahan input
+  // haya
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -44,7 +44,6 @@ const EditModal = ({ isModalOpen, closeModal, selectedCustomer }) => {
     }));
   };
 
-  // Fungsi untuk mengirimkan data yang sudah diubah ke server (PATCH)
   const handleUpdate = async () => {
     try {
       const response = await fetch(`/api/customer/${selectedCustomer._id}`, {
@@ -73,6 +72,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedCustomer }) => {
       }
 
       const updatedCustomer = await response.json();
+      refreshData();
 
       toast.success("Customer successfully updated!");
       closeModal(); // Tutup modal setelah berhasil update

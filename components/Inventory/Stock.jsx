@@ -11,52 +11,56 @@ const Stock = () => {
   const [selectedInventory, setSelectedInventory] = useState(null); 
 
   const handleEdit = (item) => {
-    setSelectedInventory(item); // Set the customer to be edited
-    setIsModalOpen(true); // Open the modal
+    setSelectedInventory(item); 
+    setIsModalOpen(true); 
     console.log("open modal edit", item)
   };
   
   const closeModal = () => {
-    setIsModalOpen(false); // Close the modal
-    setSelectedInventory(null); // Clear the selected customer
+    setIsModalOpen(false); 
+    setSelectedInventory(null); 
   };
 
 
-  useEffect(() => {
-    const fetchImages = async () => {
-      try {
-        const response = await fetch("/api/inventory/getimages");
-        if (!response.ok) {
-          throw new Error("Gagal mengambil gambar.");
-        }
-        const data = await response.json();
-        setImages(data);
-      } catch (error) {
-        console.error("Error fetching images:", error);
-        setError(error.message);
+  const fetchImages = async () => {
+    try {
+      const response = await fetch("/api/inventory/getimages");
+      if (!response.ok) {
+        throw new Error("Gagal mengambil gambar.");
       }
-    };
+      const data = await response.json();
+      setImages(data);
+    } catch (error) {
+      console.error("Error fetching images:", error);
+      setError(error.message);
+    }
+  };
+  
+  const fetchInventory = async () => {
+    try {
+      const response = await fetch("/api/inventory");
+      if (!response.ok) {
+        throw new Error("Failed to fetch inventory");
+      }
+      const data = await response.json();
+      setInventory(data.inventory || []);
+    } catch (error) {
+      console.error("Error fetching inventory:", error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
     fetchImages();
-  }, []);
-
-  useEffect(() => {
-    const fetchInventory = async () => {
-      try {
-        const response = await fetch("/api/inventory");
-        if (!response.ok) {
-          throw new Error("Failed to fetch inventory");
-        }
-        const data = await response.json();
-        setInventory(data.inventory || []);
-      } catch (error) {
-        console.error("Error fetching inventory:", error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchInventory();
   }, []);
+  
+  const refreshData = () => {
+    fetchInventory();
+    fetchImages();
+  };
 
   const getImagesForItem = (imageNames) => {
     if (!imageNames) return [];
@@ -148,7 +152,7 @@ const Stock = () => {
       ) : (
         <p className="text-gray-500">No inventory items available</p>
       )}
-       {isModalOpen && <EditModal isModalOpen={isModalOpen} closeModal={closeModal} selectedInventory={selectedInventory} />}
+       {isModalOpen && <EditModal isModalOpen={isModalOpen} closeModal={closeModal} selectedInventory={selectedInventory} refreshData={refreshData} />}
     </div>
     
   );
