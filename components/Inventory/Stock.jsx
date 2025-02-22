@@ -8,19 +8,17 @@ const Stock = () => {
   const [error, setError] = useState(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false); // To toggle the modal visibility
-  const [selectedInventory, setSelectedInventory] = useState(null); 
+  const [selectedInventory, setSelectedInventory] = useState(null);
 
   const handleEdit = (item) => {
-    setSelectedInventory(item); 
-    setIsModalOpen(true); 
-    console.log("open modal edit", item)
-  };
-  
-  const closeModal = () => {
-    setIsModalOpen(false); 
-    setSelectedInventory(null); 
+    setSelectedInventory(item);
+    setIsModalOpen(true);
   };
 
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedInventory(null);
+  };
 
   const fetchImages = async () => {
     try {
@@ -35,7 +33,7 @@ const Stock = () => {
       setError(error.message);
     }
   };
-  
+
   const fetchInventory = async () => {
     try {
       const response = await fetch("/api/inventory");
@@ -51,12 +49,12 @@ const Stock = () => {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchImages();
     fetchInventory();
   }, []);
-  
+
   const refreshData = () => {
     fetchInventory();
     fetchImages();
@@ -73,8 +71,7 @@ const Stock = () => {
   };
 
   return (
-    
-    <div >
+    <div>
       <div className="flex flex-1 justify-between items-center">
         <h2 className="text-2xl font-bold mb-4">Stock List</h2>
       </div>
@@ -121,26 +118,44 @@ const Stock = () => {
                     </div>
 
                     <div className="flex gap-5">
-                      <button className="text-white font-bold text-sm border bg-black rounded-md pt-1 pb-1 pl-2 pr-2">Description</button>
+                      <button className="text-white font-bold text-sm border bg-black rounded-md pt-1 pb-1 pl-2 pr-2">
+                        Description
+                      </button>
 
-                      <button onClick={() => handleEdit(item)} className="text-white font-bold text-sm border bg-green-400 rounded-md pt-1 pb-1 pl-2 pr-2">Edit</button>
+                      <button
+                        onClick={() => handleEdit(item)}
+                        className="text-white font-bold text-sm border bg-green-400 rounded-md pt-1 pb-1 pl-2 pr-2"
+                      >
+                        Edit
+                      </button>
                     </div>
 
                     {/* Gambar */}
                     <div className="flex space-x-2">
                       {matchedImages.length > 0 ? (
                         matchedImages.map((img, index) => (
-                          <img
+                          <div
                             key={`${item._id}-${index}`}
-                            src={img.imageData}
-                            alt={img.imageName}
-                            className="w-20 h-20 object-cover rounded-md"
-                          />
+                            className="relative"
+                          >
+                            <img
+                              src={img.imageData}
+                              alt={img.imageName || "No Image"}
+                              className="w-20 h-20 object-cover rounded-md"
+                            />
+                            {!img.imageName && (
+                              <p className="absolute inset-0 flex items-center justify-center text-xs text-gray-500 bg-white bg-opacity-70 rounded-md">
+                                No Image
+                              </p>
+                            )}
+                          </div>
                         ))
                       ) : (
-                        <p className="text-gray-500 text-sm">
-                          No images available
-                        </p>
+                        <div className="w-20 h-20 bg-gray-300 rounded-md flex items-center justify-center">
+                          <span className="text-xs text-gray-500">
+                            No Image
+                          </span>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -152,9 +167,15 @@ const Stock = () => {
       ) : (
         <p className="text-gray-500">No inventory items available</p>
       )}
-       {isModalOpen && <EditModal isModalOpen={isModalOpen} closeModal={closeModal} selectedInventory={selectedInventory} refreshData={refreshData} />}
+      {isModalOpen && (
+        <EditModal
+          isModalOpen={isModalOpen}
+          closeModal={closeModal}
+          selectedInventory={selectedInventory}
+          refreshData={refreshData}
+        />
+      )}
     </div>
-    
   );
 };
 

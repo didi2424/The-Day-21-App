@@ -115,8 +115,6 @@ const StockAdd = () => {
       imagesnames: uploadedNames,
     };
 
-    console.log("Final Form Data:", finalFormData);
-
     try {
       const response = await fetch("/api/inventory/new/", {
         method: "POST",

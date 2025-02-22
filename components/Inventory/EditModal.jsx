@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import { MdDelete } from "react-icons/md";
 
 const EditModal = ({
   isModalOpen,
@@ -35,6 +36,107 @@ const EditModal = ({
       return extractedImages;
     } catch (error) {
       return [];
+    }
+  };
+  const [displayPrice, setDisplayPrice] = useState(""); // Untuk tampilan harga dalam Rupiah
+
+  useEffect(() => {
+    if (selectedInventory?.price) {
+      setFormData((prevData) => ({
+        ...prevData,
+        price: selectedInventory.price, // Simpan angka asli di formData
+      }));
+
+      setDisplayPrice(formatToRupiah(selectedInventory.price)); // Format untuk tampilan
+    }
+  }, [selectedInventory]);
+
+  const formatToRupiah = (value) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(value);
+  };
+
+  
+  const handlePriceChange = (e) => {
+    const rawValue = e.target.value.replace(/\D/g, ""); // Hanya angka
+    setFormData((prevData) => ({
+      ...prevData,
+      price: rawValue, // Simpan angka asli di state
+    }));
+    setDisplayPrice(rawValue); // Tampilkan angka mentah di input saat mengetik
+  };
+
+  const handlePriceBlur = () => {
+    setDisplayPrice(formatToRupiah(formData.price)); // Ubah ke format Rupiah saat kehilangan fokus
+  };
+  const [deletedImages, setDeletedImages] = useState([]);
+
+  const handleDelete = (image) => {
+    console.log("Deleting image:", image.imageName);
+
+    // Tambahkan nama gambar ke deletedImages
+    setDeletedImages((prev) => [...prev, image.imageName]);
+
+    // Hapus gambar dari daftar images
+    const updatedImages = images.filter(
+      (img) => img.imageName !== image.imageName
+    );
+    setImages(updatedImages);
+
+    // Jika gambar utama yang dihapus, ganti dengan gambar lain atau set ke null
+    if (mainImage && image.imageName === mainImage.imageName) {
+      setMainImage(updatedImages.length > 0 ? updatedImages[0] : null);
+    }
+  };
+
+  const deleteImagesFromServer = async () => {
+    if (deletedImages.length === 0) {
+      console.warn("No images to delete");
+      return;
+    }
+
+    const queryParams = deletedImages
+      .map((name) => `names=${encodeURIComponent(name)}`)
+      .join("&");
+
+    try {
+      const response = await fetch(
+        `/api/inventory/getimages/imagesbyname?${queryParams}`,
+        { method: "DELETE" }
+      );
+
+      const data = await response.json();
+      if (response.ok) {
+        console.log("Deleted images:", data);
+        setDeletedImages([]); // Reset array setelah berhasil dihapus
+      } else {
+        console.error("Error deleting images:", data.message);
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+    }
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newImage = {
+          imageName: file.name,
+          imageData: reader.result, // Base64 image
+        };
+        setImages((prevImages) => [...prevImages, newImage])
+        // Jika belum ada mainImage, set gambar baru jadi mainImage
+        if (!mainImage) {
+          setMainImage(newImage);
+        }
+      };
+      reader.readAsDataURL(file);
+      console.log(file)
     }
   };
 
@@ -80,44 +182,92 @@ const EditModal = ({
     }
   }, [selectedInventory]);
 
+  console.log(selectedInventory);
+
   useEffect(() => {
     if (selectedInventory?.imagesnames?.length > 0) {
-      fetchImagesByNames(selectedInventory.imagesnames).then((fetchedImages) => {
-        setImages(fetchedImages);
-        if (fetchedImages.length > 0) {
-          setMainImage(fetchedImages[0]); // Set gambar pertama sebagai yang utama
+      fetchImagesByNames(selectedInventory.imagesnames).then(
+        (fetchedImages) => {
+          setImages(fetchedImages);
+          if (fetchedImages.length > 0) {
+            setMainImage(fetchedImages[0]); // Set gambar pertama sebagai yang utama
+          }
         }
-      });
+      );
     }
   }, [selectedInventory]); // Gunakan `selectedInventory` sebagai dependency
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // Hapus semua karakter selain angka
+    const numericValue = value.replace(/\D/g, "");
+
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: numericValue,
     }));
   };
 
   const handleUpdate = async () => {
     try {
+      // Hapus deletedImages dari formData.imagesnames sebelum update
+      const updatedImagesNames = formData.imagesnames.filter(
+        (name) => !deletedImages.includes(name)
+      );
+
+      const updatedFormData = {
+        ...formData,
+        imagesnames: updatedImagesNames,
+      };
+
       const response = await fetch(`/api/inventory/${formData._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(updatedFormData),
       });
 
       if (!response.ok) {
         throw new Error("Failed to update inventory");
       }
+
       toast.success("Inventory updated successfully!");
       refreshData();
+
+      console.log("Deleted images before sending to server:", deletedImages);
+
+      await deleteImagesFromServer(); // Hapus gambar dari server setelah update berhasil
+
       closeModal(); // Tutup modal setelah berhasil update
     } catch (error) {
       console.error("Error updating inventory:", error);
       toast.error("Failed to update inventory");
     }
   };
+
+  const handleImageUpload = async (image) => {
+    try {
+      const response = await fetch("/api/upload-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(image),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      }
+      console.log("Image uploaded successfully");
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    }
+  };
+
+
+  const handletest = async (image) => {
+    handleImageUpload()
+  }
+
+
+
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
@@ -146,10 +296,11 @@ const EditModal = ({
               <div>
                 <label className="block text-sm font-medium">Price</label>
                 <input
-                  type="number"
+                  type="text"
                   name="price"
-                  value={formData.price}
-                  onChange={handleChange}
+                  value={displayPrice}
+                  onChange={handlePriceChange}
+                  onBlur={handlePriceBlur}
                   className="w-full rounded-md bg-gray-100 p-2"
                   placeholder="Enter price"
                 />
@@ -303,39 +454,75 @@ const EditModal = ({
             </div>
           </div>
 
-          {/* section menu right */}
-          <div >
+          <div>
             <p className="mt-6 block text-sm font-medium">Product Images</p>
-            <div className="flex flex-col items-center">
-            {mainImage ? (
-              <img
-                src={mainImage.imageData}
-                alt={mainImage.imageName}
-                className="w-60 h-60 object-cover rounded-md transition-all duration-300 mt-6"
-              />
-            ) : (
-              <p className="text-gray-500 text-sm">No images available</p>
-            )}
-
-            {/* Gambar kecil di bawah */}
-            {images.length > 1 && (
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                {images.map((img, index) => (
+            <div className="flex flex-col items-center relative">
+              {mainImage ? (
+                <div className="relative">
                   <img
-                    key={index}
-                    src={img.imageData}
-                    alt={img.imageName}
-                    className="w-16 h-16 object-cover rounded-md cursor-pointer hover:opacity-80 transition-all"
-                    onClick={() => setMainImage(img)} // Saat diklik, ubah gambar utama
+                    src={mainImage.imageData}
+                    alt={mainImage.imageName}
+                    className="w-60 h-60 object-cover rounded-md transition-all duration-300 mt-6 shadow-md"
                   />
-                ))}
-              </div>
-            )}
+                  {/* Icon delete di gambar besar */}
+                  <MdDelete
+                    className="absolute bottom-2 right-2 bg-white text-black p-1 rounded-full shadow-md hover:bg-gray-400 transition text-3xl"
+                    onClick={() => handleDelete(mainImage)}
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-col items-center mt-6">
+                  <p className="text-gray-500 text-sm mb-2">
+                    No images available
+                  </p>
+                  {/* Tombol Add Image di tengah jika tidak ada gambar */}
+                  <label className="w-16 h-16 flex items-center justify-center border-2 border-dashed border-gray-400 rounded-md text-gray-500 hover:bg-gray-200 transition-all cursor-pointer">
+                    +
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                  </label>
+                </div>
+              )}
+
+              {/* Gambar kecil di bawah + tombol tambah gambar */}
+              {images.length > 0 && (
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  {images
+                    .filter((img) => img.imageName !== mainImage?.imageName)
+                    .map((img, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={img.imageData}
+                          alt={img.imageName}
+                          className="w-16 h-16 object-cover rounded-md cursor-pointer hover:opacity-80 transition-all"
+                          onClick={() => setMainImage(img)}
+                        />
+                        {/* Icon delete di gambar kecil */}
+                        <MdDelete
+                          className="absolute bottom-2 right-2 bg-white text-black p-1 rounded-full shadow-md hover:bg-gray-400 transition"
+                          onClick={() => handleDelete(img)}
+                        />
+                      </div>
+                    ))}
+
+                  {/* Tombol Tambah Gambar di samping gambar kecil */}
+                  <label className="w-16 h-16 flex items-center justify-center border-2 border-dashed border-gray-400 rounded-md text-gray-500 hover:bg-gray-200 transition-all cursor-pointer">
+                    +
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
           </div>
-
-          </div>
-
-
         </div>
 
         <div className="mt-4 flex justify-end gap-4">

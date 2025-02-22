@@ -61,8 +61,7 @@ export const PATCH = async (request, { params }) => {
       return new Response(JSON.stringify(existingCustomer), { status: 200 });
   
     } catch (error) {
-      // Jika terjadi error, kirimkan response 500
-      console.error(error);
+
       return new Response("Failed to Update Customer", { status: 500 });
     }
   };

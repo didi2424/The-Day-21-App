@@ -17,7 +17,7 @@ const handler = NextAuth({
   ],
 
   callbacks: {
-    async session({ session, user }) {
+    async session({ session }) {
       // You can add custom session logic here, e.g., add user data to the session
       // For now, this just returns the default session object.
 
