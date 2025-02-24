@@ -169,7 +169,6 @@ const CustomerList = () => {
         )}
       </ul>
 
-
       <div className="flex justify-between mt-4">
         <p className="mt-2 text-sm">Page {currentPage} of {totalPages}</p>
         <div className='gap-4 flex'>

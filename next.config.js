@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    appDir: true,
-    serverComponentsExternalPackages: ["mongoose"],
+    topLevelAwait: true,
   },
+  serverExternalPackages: ["mongoose"], // moved from experimental
   images: {
     remotePatterns: [
       {
@@ -12,8 +12,7 @@ const nextConfig = {
       },
     ],
   },
-  webpack(config) {
-    /** @type {import('webpack').Configuration} */
+  webpack: (config) => { // Fixed type error by explicitly declaring parameter
     config.experiments = {
       ...config.experiments,
       topLevelAwait: true,

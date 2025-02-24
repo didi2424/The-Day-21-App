@@ -1,6 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { MdDelete } from "react-icons/md";
+
+import {
+  handleImageUpload,
+  fetchImagesByNames,
+  deleteImagesFromServer,
+} from "@/utils/api/images";
 
 const EditModal = ({
   isModalOpen,
@@ -9,35 +15,9 @@ const EditModal = ({
   refreshData,
 }) => {
   if (!isModalOpen) return null; // Jangan render modal jika tidak terbuka
-  const [images, setImages] = useState([]); // State untuk menyimpan gambar
-  const [mainImage, setMainImage] = useState(null); // Gambar utama besar
-
-  const fetchImagesByNames = async (imagesnames) => {
-    if (!Array.isArray(imagesnames) || imagesnames.length === 0) {
-      console.error("Invalid imagesnames format:", imagesnames);
-      return [];
-    }
-    try {
-      const queryParams = imagesnames
-        .map((name) => `names=${encodeURIComponent(name)}`)
-        .join("&");
-      const response = await fetch(
-        `/api/inventory/getimages/imagesbyname?${queryParams}`
-      );
-
-      if (!response.ok) throw new Error("Failed to fetch images");
-      const data = await response.json();
-      const extractedImages = data.flatMap((item) =>
-        item.images.map((img) => ({
-          imageName: img.imageName,
-          imageData: img.imageData,
-        }))
-      );
-      return extractedImages;
-    } catch (error) {
-      return [];
-    }
-  };
+  const [images, setImages] = useState([]);
+  const [mainImage, setMainImage] = useState(null);
+  const [pendingImages, setPendingImages] = useState([]); // Gambar yang belum diupload
   const [displayPrice, setDisplayPrice] = useState(""); // Untuk tampilan harga dalam Rupiah
 
   useEffect(() => {
@@ -59,7 +39,6 @@ const EditModal = ({
     }).format(value);
   };
 
-  
   const handlePriceChange = (e) => {
     const rawValue = e.target.value.replace(/\D/g, ""); // Hanya angka
     setFormData((prevData) => ({
@@ -75,69 +54,49 @@ const EditModal = ({
   const [deletedImages, setDeletedImages] = useState([]);
 
   const handleDelete = (image) => {
-    console.log("Deleting image:", image.imageName);
-
-    // Tambahkan nama gambar ke deletedImages
     setDeletedImages((prev) => [...prev, image.imageName]);
-
-    // Hapus gambar dari daftar images
     const updatedImages = images.filter(
       (img) => img.imageName !== image.imageName
     );
     setImages(updatedImages);
-
     // Jika gambar utama yang dihapus, ganti dengan gambar lain atau set ke null
     if (mainImage && image.imageName === mainImage.imageName) {
       setMainImage(updatedImages.length > 0 ? updatedImages[0] : null);
     }
   };
 
-  const deleteImagesFromServer = async () => {
-    if (deletedImages.length === 0) {
-      console.warn("No images to delete");
-      return;
-    }
-
-    const queryParams = deletedImages
-      .map((name) => `names=${encodeURIComponent(name)}`)
-      .join("&");
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
 
     try {
-      const response = await fetch(
-        `/api/inventory/getimages/imagesbyname?${queryParams}`,
-        { method: "DELETE" }
-      );
+      // Convert file ke base64 untuk preview langsung
+      const base64Image = await convertToBase64(file);
 
-      const data = await response.json();
-      if (response.ok) {
-        console.log("Deleted images:", data);
-        setDeletedImages([]); // Reset array setelah berhasil dihapus
-      } else {
-        console.error("Error deleting images:", data.message);
-      }
+      // Tambahkan ke state images untuk preview langsung
+      const newImage = {
+        imageName: file.name, // Nama sementara
+        imageData: base64Image, // Base64 untuk preview
+      };
+
+      setImages((prevImages) => [...prevImages, newImage]); // 🔥 Langsung update preview
+
+      // Simpan ke pendingImages untuk diupload saat update
+      setPendingImages((prev) => [...prev, newImage]);
+
+      toast.success("Image added to preview!");
     } catch (error) {
-      console.error("Network error:", error);
+      console.error("Error processing image:", error);
+      toast.error("Failed to process image");
     }
   };
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
+  const convertToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        const newImage = {
-          imageName: file.name,
-          imageData: reader.result, // Base64 image
-        };
-        setImages((prevImages) => [...prevImages, newImage])
-        // Jika belum ada mainImage, set gambar baru jadi mainImage
-        if (!mainImage) {
-          setMainImage(newImage);
-        }
-      };
       reader.readAsDataURL(file);
-      console.log(file)
-    }
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
   };
 
   const [formData, setFormData] = useState({
@@ -147,6 +106,7 @@ const EditModal = ({
     manufacture: "",
     category: "",
     subcategory: "",
+    stock: "",
     stroage: "",
     condition: "",
     marking: "",
@@ -168,10 +128,12 @@ const EditModal = ({
         category: selectedInventory.category || "",
         subcategory: selectedInventory.subcategory || "",
         stroage: selectedInventory.stroage || "",
+        stock: selectedInventory.stock || "",
         condition: selectedInventory.condition || "",
         marking: selectedInventory.marking || "",
         packagetype: selectedInventory.packagetype || "",
         row: selectedInventory.row || "",
+        
         column: selectedInventory.column || "",
         description: selectedInventory.description || "",
         sku: selectedInventory.sku || "",
@@ -182,7 +144,32 @@ const EditModal = ({
     }
   }, [selectedInventory]);
 
-  console.log(selectedInventory);
+  const handleFetchImages = useCallback(async () => {
+    if (!formData.imagesnames || formData.imagesnames.length === 0) return;
+
+    try {
+      const fetchedImages = await fetchImagesByNames(formData.imagesnames);
+      setImages(fetchedImages);
+    } catch (error) {
+      console.error("Error fetching images:", error);
+    }
+  }, [formData.imagesnames]);
+
+  // Update formData ketika selectedInventory berubah
+  useEffect(() => {
+    if (selectedInventory) {
+      setFormData((prev) => ({
+        ...prev,
+        ...selectedInventory,
+        imagesnames: selectedInventory.imagesnames || [],
+      }));
+    }
+  }, [selectedInventory]);
+
+  // Fetch images setelah formData.imagesnames diperbarui
+  useEffect(() => {
+    handleFetchImages();
+  }, [handleFetchImages]);
 
   useEffect(() => {
     if (selectedInventory?.imagesnames?.length > 0) {
@@ -200,27 +187,47 @@ const EditModal = ({
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Hapus semua karakter selain angka
-    const numericValue = value.replace(/\D/g, "");
-
     setFormData((prevData) => ({
       ...prevData,
-      [name]: numericValue,
+      [name]: name === "price" ? value.replace(/\D/g, "") : value, // 🔥 Hanya hapus karakter selain angka untuk "price"
     }));
   };
 
   const handleUpdate = async () => {
     try {
-      // Hapus deletedImages dari formData.imagesnames sebelum update
-      const updatedImagesNames = formData.imagesnames.filter(
-        (name) => !deletedImages.includes(name)
-      );
+      // 1️⃣ Hapus gambar yang dihapus dari server sebelum update
+      if (deletedImages.length > 0) {
+        const success = await deleteImagesFromServer(deletedImages);
+        if (!success) {
+          toast.error("Failed to delete images from server");
+          return;
+        }
+      }
+
+      // 2️⃣ Upload semua gambar baru di `pendingImages`
+      const uploadedImageNames = [];
+      for (const image of pendingImages) {
+        const uploadedName = await handleImageUpload(image);
+        if (uploadedName) {
+          uploadedImageNames.push(uploadedName);
+        } else {
+          toast.error(`Failed to upload image: ${image.imageName}`);
+          return; // Hentikan jika ada gambar gagal diupload
+        }
+      }
+
+      // 3️⃣ Hapus deletedImages dari formData.imagesnames sebelum update
+      const updatedImagesNames = [
+        ...formData.imagesnames.filter((name) => !deletedImages.includes(name)),
+        ...uploadedImageNames, // Tambahkan gambar baru yang berhasil diupload
+      ];
 
       const updatedFormData = {
         ...formData,
         imagesnames: updatedImagesNames,
       };
 
+      // 4️⃣ Update inventory setelah upload selesai
       const response = await fetch(`/api/inventory/${formData._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -234,40 +241,15 @@ const EditModal = ({
       toast.success("Inventory updated successfully!");
       refreshData();
 
-      console.log("Deleted images before sending to server:", deletedImages);
-
-      await deleteImagesFromServer(); // Hapus gambar dari server setelah update berhasil
-
-      closeModal(); // Tutup modal setelah berhasil update
+      // Reset state setelah update
+      setDeletedImages([]);
+      setPendingImages([]); // Kosongkan antrian upload setelah update
+      closeModal();
     } catch (error) {
       console.error("Error updating inventory:", error);
       toast.error("Failed to update inventory");
     }
   };
-
-  const handleImageUpload = async (image) => {
-    try {
-      const response = await fetch("/api/upload-image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(image),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to upload image");
-      }
-      console.log("Image uploaded successfully");
-    } catch (error) {
-      console.error("Error uploading image:", error);
-    }
-  };
-
-
-  const handletest = async (image) => {
-    handleImageUpload()
-  }
-
-
-
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
@@ -432,6 +414,7 @@ const EditModal = ({
                 <label className="block text-sm font-medium">Description</label>
                 <textarea
                   name="description"
+                  type="text"
                   value={formData.description}
                   onChange={handleChange}
                   className="w-full rounded-md bg-gray-100 p-2 "
@@ -440,6 +423,8 @@ const EditModal = ({
                 />
               </div>
 
+
+              <div className="grid grid-cols-2 gap-4 mt-3">
               <div>
                 <label className="block text-sm font-medium">SKU</label>
                 <input
@@ -450,6 +435,20 @@ const EditModal = ({
                   className="w-full rounded-md bg-gray-100 p-2"
                   placeholder="Enter SKU"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium">Stock</label>
+                <input
+                  type="number"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleChange}
+                  className="w-full rounded-md bg-gray-100 p-2"
+                  placeholder="Enter SKU"
+                />
+              </div>
+
               </div>
             </div>
           </div>

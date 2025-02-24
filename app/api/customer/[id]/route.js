@@ -14,6 +14,7 @@ export const DELETE = async (request, { params }) => {
 
         return new Response("Task Deleted Successfully", { status: 200 });
     } catch (error) {
+        console.log(error);
         return new Response("Failed to Delete Task", { status: 500 });
     }
 };
@@ -61,7 +62,8 @@ export const PATCH = async (request, { params }) => {
       return new Response(JSON.stringify(existingCustomer), { status: 200 });
   
     } catch (error) {
-
+      // Jika terjadi error, kirimkan response 500
+      console.log(error);
       return new Response("Failed to Update Customer", { status: 500 });
     }
   };

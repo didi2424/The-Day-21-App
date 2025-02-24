@@ -5,7 +5,7 @@ import Provider from "@components/Provider";
 import { useSession } from "next-auth/react";
 import SidebarInventory from "../../../components/Sidebar/SidebarInventory";
 import InventoryCard from "../../../components/Inventory/CardInventory/InventoryCard"; // Adjust path if necessary
-import Stock from "../../../components/Inventory/Stock"
+import StockList from "../../../components/Inventory/StockList"
 import StockAdd from "../../../components/Inventory/StockAdd";
 
 import SvgIcon from "../../../components/Inventory/Drawyer/Drawyer5x5";
@@ -53,7 +53,7 @@ const DashboardInvetoryContent = ({ activeButton }) => {
   switch (activeButton) {
     case "stock":
       return (
-        <Stock/>
+        <StockList/>
       );
     case "addstock":
       return (
