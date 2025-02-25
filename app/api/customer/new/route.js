@@ -2,52 +2,64 @@ import Constumer from "@models/constumer";
 import { connectToDB } from "@utils/database";
 
 export const POST = async (request) => {
-  const {
-    wa_number,
-    constumer_name,
-    organisation,
-    company,
-    constumer_address: { street, city, kecamatan, kabupaten, province, postal_code },
-  } = await request.json(); // Ambil data yang dikirimkan dari frontend
-
   try {
-    // Connect ke database MongoDB
     await connectToDB();
 
-    // Cek apakah nomor telepon sudah ada
-    const existingCustomer = await Constumer.findOne({ wa_number });
-    if (existingCustomer) {
-      // Jika sudah ada, kembalikan status 409 Conflict
+    const requestData = await request.json();
+    console.log('Received data:', requestData); // Add this for debugging
+
+    const {
+      wa_number,
+      constumer_name,
+      organisation,
+      company,
+      status, // Ensure status is at root level
+      constumer_address
+    } = requestData;
+
+    // Validate required fields
+    if (!status) {
       return new Response(
-        JSON.stringify({ message: "Nomor telepon sudah terdaftar" }),
-        { status: 409 }
+        JSON.stringify({ error: "Status is required" }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    // Membuat document baru berdasarkan data yang diterima dari frontend
+    // Check for existing customer
+    const existingCustomer = await Constumer.findOne({ wa_number });
+    if (existingCustomer) {
+      return new Response(
+        JSON.stringify({ message: "Nomor telepon sudah terdaftar" }),
+        { status: 409, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     const newConstumer = new Constumer({
       wa_number,
       constumer_name,
       organisation,
       company,
-      constumer_address: {
-        street,
-        city,
-        kecamatan,
-        kabupaten,
-        province,
-        postal_code,
-      },
+      status,
+      constumer_address
     });
 
-    // Simpan data customer ke database
     await newConstumer.save();
+    return new Response(JSON.stringify(newConstumer), { 
+      status: 201,
+      headers: { 'Content-Type': 'application/json' }
+    });
 
-    // Kirim respons jika berhasil disimpan
-    return new Response(JSON.stringify(newConstumer), { status: 201 });
   } catch (error) {
-    // Jika terjadi error, kirim respons dengan status 500
-    console.error(error);
-    return new Response("Failed to create a new customer", { status: 500 });
+    console.error("Customer creation error:", error);
+    return new Response(
+      JSON.stringify({ 
+        error: error.message,
+        details: error.errors // Include validation errors in response
+      }), 
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
   }
 };

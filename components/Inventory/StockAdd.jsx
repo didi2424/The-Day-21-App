@@ -116,7 +116,7 @@ const StockAdd = () => {
     };
 
     try {
-      const response = await fetch("/api/inventory/new/", {
+      const response = await fetch("/api/inventory/newInventory/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(finalFormData),

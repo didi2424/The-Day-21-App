@@ -15,6 +15,7 @@ const CustomerAdd = () => {
     kabupaten: "",
     province: "",
     postalCode: "",
+    status : ""
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
@@ -56,6 +57,7 @@ const CustomerAdd = () => {
       { field: 'kabupaten', label: 'Kabupaten' },
       { field: 'province', label: 'Provinsi' },
       { field: 'postalCode', label: 'Kode Pos' },
+      { field: 'status', label: 'Status' },
     ];
   
     for (let { field, label } of requiredFields) {
@@ -76,6 +78,7 @@ const CustomerAdd = () => {
       constumer_name: `${formData.firstName} ${formData.lastName}`,
       organisation: formData.organisation,
       company: formData.company,
+      status: formData.status,
       constumer_address: {
         street: formData.street,
         city: formData.city,
@@ -133,6 +136,7 @@ const CustomerAdd = () => {
         kabupaten: "",
         province: "",
         postalCode: "",
+        status : ""
       });
   
       // Optionally reset form validity state if you have additional logic for it
@@ -204,7 +208,8 @@ const CustomerAdd = () => {
               </div>
 
               {/* Organisation */}
-              <div className="flex flex-col gap-2 w-1/2">
+              <div className="flex gap-2 w-1/2">
+              <div>
                 <div className="font-medium text-sm">Organisation</div>
                 <input
                   type="text"
@@ -213,7 +218,23 @@ const CustomerAdd = () => {
                   onChange={handleChange}
                   className="w-full rounded-md bg-[#efefef] p-2"
                 />
+                </div>
+
+                <div>
+                <div className="font-medium text-sm">Status</div>
+                <input
+                  type="text"
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  className="w-full rounded-md bg-[#efefef] p-2"
+                />
+                </div>
               </div>
+
+              
+
+              
             </div>
           </div>
 

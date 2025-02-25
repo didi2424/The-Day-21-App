@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 
-const EditModal = ({ isModalOpen, closeModal, selectedCustomer, refreshData }) => {
+const EditModal = ({
+  isModalOpen,
+  closeModal,
+  selectedCustomer,
+  refreshData,
+}) => {
   if (!isModalOpen || !selectedCustomer) return null;
 
   const [formData, setFormData] = useState({
@@ -15,6 +20,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedCustomer, refreshData }) =
     kabupaten: "",
     province: "",
     postal_code: "",
+    status: "",
   });
 
   // Mengatur data form saat modal dibuka
@@ -23,6 +29,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedCustomer, refreshData }) =
       setFormData({
         constumer_name: selectedCustomer.constumer_name,
         wa_number: selectedCustomer.wa_number,
+        status: selectedCustomer.status,
         company: selectedCustomer.company,
         organisation: selectedCustomer.organisation,
         street: selectedCustomer.constumer_address.street,
@@ -43,7 +50,12 @@ const EditModal = ({ isModalOpen, closeModal, selectedCustomer, refreshData }) =
       [name]: value,
     }));
   };
-
+  const toggleStatus = () => {
+    setFormData((prev) => ({
+      ...prev,
+      status: prev.status === "active" ? "deactive" : "active",
+    }));
+  };
   const handleUpdate = async () => {
     try {
       const response = await fetch(`/api/customer/${selectedCustomer._id}`, {
@@ -56,6 +68,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedCustomer, refreshData }) =
           constumer_name: formData.constumer_name,
           company: formData.company,
           organisation: formData.organisation,
+          status: formData.status,
           constumer_address: {
             street: formData.street,
             city: formData.city,
@@ -136,6 +149,23 @@ const EditModal = ({ isModalOpen, closeModal, selectedCustomer, refreshData }) =
           </div>
         </div>
 
+        {/* Status */}
+        <div>
+          <div className="text-sm font-bold mt-4">Status</div>
+          <div
+            className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition ${
+              formData.status === "active" ? "bg-green-500" : "bg-orange-500"
+            }`}
+            onClick={toggleStatus}
+          >
+            <div
+              className={`w-6 h-6 bg-white rounded-full shadow-md transform transition ${
+                formData.status === "active" ? "translate-x-6" : "translate-x-0"
+              }`}
+            ></div>
+          </div>
+        </div>
+
         {/* Address Section */}
         <div className="mt-4 flex flex-col gap-2">
           <div className="text-sm font-bold">Street</div>
@@ -209,18 +239,10 @@ const EditModal = ({ isModalOpen, closeModal, selectedCustomer, refreshData }) =
 
         {/* Buttons */}
         <div className="mt-4 flex justify-end gap-4">
-          <button
-            type="button"
-            className="next_btn"
-            onClick={closeModal}
-          >
+          <button type="button" className="next_btn" onClick={closeModal}>
             Close
           </button>
-          <button
-            type="button"
-            className="next_btn"
-            onClick={handleUpdate}
-          >
+          <button type="button" className="next_btn" onClick={handleUpdate}>
             Update
           </button>
         </div>

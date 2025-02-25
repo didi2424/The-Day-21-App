@@ -8,96 +8,11 @@ import {
   deleteImagesFromServer,
 } from "@/utils/api/images";
 
-const EditModal = ({
-  isModalOpen,
-  closeModal,
-  selectedInventory,
-  refreshData,
-}) => {
-  if (!isModalOpen) return null; // Jangan render modal jika tidak terbuka
-  const [images, setImages] = useState([]);
-  const [mainImage, setMainImage] = useState(null);
-  const [pendingImages, setPendingImages] = useState([]); // Gambar yang belum diupload
-  const [displayPrice, setDisplayPrice] = useState(""); // Untuk tampilan harga dalam Rupiah
+import {formatToRupiah} from "@/utils/format/currency";
+import { convertToBase64 } from "@/utils/format/convertobase64";
 
-  useEffect(() => {
-    if (selectedInventory?.price) {
-      setFormData((prevData) => ({
-        ...prevData,
-        price: selectedInventory.price, // Simpan angka asli di formData
-      }));
-
-      setDisplayPrice(formatToRupiah(selectedInventory.price)); // Format untuk tampilan
-    }
-  }, [selectedInventory]);
-
-  const formatToRupiah = (value) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(value);
-  };
-
-  const handlePriceChange = (e) => {
-    const rawValue = e.target.value.replace(/\D/g, ""); // Hanya angka
-    setFormData((prevData) => ({
-      ...prevData,
-      price: rawValue, // Simpan angka asli di state
-    }));
-    setDisplayPrice(rawValue); // Tampilkan angka mentah di input saat mengetik
-  };
-
-  const handlePriceBlur = () => {
-    setDisplayPrice(formatToRupiah(formData.price)); // Ubah ke format Rupiah saat kehilangan fokus
-  };
-  const [deletedImages, setDeletedImages] = useState([]);
-
-  const handleDelete = (image) => {
-    setDeletedImages((prev) => [...prev, image.imageName]);
-    const updatedImages = images.filter(
-      (img) => img.imageName !== image.imageName
-    );
-    setImages(updatedImages);
-    // Jika gambar utama yang dihapus, ganti dengan gambar lain atau set ke null
-    if (mainImage && image.imageName === mainImage.imageName) {
-      setMainImage(updatedImages.length > 0 ? updatedImages[0] : null);
-    }
-  };
-
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    try {
-      // Convert file ke base64 untuk preview langsung
-      const base64Image = await convertToBase64(file);
-
-      // Tambahkan ke state images untuk preview langsung
-      const newImage = {
-        imageName: file.name, // Nama sementara
-        imageData: base64Image, // Base64 untuk preview
-      };
-
-      setImages((prevImages) => [...prevImages, newImage]); // 🔥 Langsung update preview
-
-      // Simpan ke pendingImages untuk diupload saat update
-      setPendingImages((prev) => [...prev, newImage]);
-
-      toast.success("Image added to preview!");
-    } catch (error) {
-      console.error("Error processing image:", error);
-      toast.error("Failed to process image");
-    }
-  };
-  const convertToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
-  };
+const EditModal = ({ isModalOpen, closeModal, selectedInventory, refreshData }) => {
+  if (!isModalOpen) return null;
 
   const [formData, setFormData] = useState({
     _id: "",
@@ -118,35 +33,15 @@ const EditModal = ({
     imagesnames: [],
   });
 
-  useEffect(() => {
-    if (selectedInventory && Object.keys(selectedInventory).length > 0) {
-      setFormData({
-        _id: selectedInventory._id || "",
-        name: selectedInventory.name || "",
-        price: selectedInventory.price || "",
-        manufacture: selectedInventory.manufacture || "",
-        category: selectedInventory.category || "",
-        subcategory: selectedInventory.subcategory || "",
-        stroage: selectedInventory.stroage || "",
-        stock: selectedInventory.stock || "",
-        condition: selectedInventory.condition || "",
-        marking: selectedInventory.marking || "",
-        packagetype: selectedInventory.packagetype || "",
-        row: selectedInventory.row || "",
-        
-        column: selectedInventory.column || "",
-        description: selectedInventory.description || "",
-        sku: selectedInventory.sku || "",
-        imagesnames: Array.isArray(selectedInventory.imagesnames)
-          ? selectedInventory.imagesnames
-          : [],
-      });
-    }
-  }, [selectedInventory]);
+  const [images, setImages] = useState([]);
+  const [mainImage, setMainImage] = useState(null);
+  const [pendingImages, setPendingImages] = useState([]); // Gambar yang akan diupload
+  const [deletedImages, setDeletedImages] = useState([]); // Gambar yang akan dihapus
+  const [displayPrice, setDisplayPrice] = useState(""); // Untuk tampilan harga dalam Rupiah
 
+  // Fetch images by names
   const handleFetchImages = useCallback(async () => {
     if (!formData.imagesnames || formData.imagesnames.length === 0) return;
-
     try {
       const fetchedImages = await fetchImagesByNames(formData.imagesnames);
       setImages(fetchedImages);
@@ -155,47 +50,101 @@ const EditModal = ({
     }
   }, [formData.imagesnames]);
 
-  // Update formData ketika selectedInventory berubah
+  // useEffect utama (menggabungkan beberapa efek menjadi satu)
   useEffect(() => {
-    if (selectedInventory) {
-      setFormData((prev) => ({
-        ...prev,
-        ...selectedInventory,
-        imagesnames: selectedInventory.imagesnames || [],
-      }));
-    }
-  }, [selectedInventory]);
+    if (!selectedInventory || Object.keys(selectedInventory).length === 0) return;
 
-  // Fetch images setelah formData.imagesnames diperbarui
-  useEffect(() => {
-    handleFetchImages();
-  }, [handleFetchImages]);
-
-  useEffect(() => {
-    if (selectedInventory?.imagesnames?.length > 0) {
-      fetchImagesByNames(selectedInventory.imagesnames).then(
-        (fetchedImages) => {
-          setImages(fetchedImages);
-          if (fetchedImages.length > 0) {
-            setMainImage(fetchedImages[0]); // Set gambar pertama sebagai yang utama
-          }
-        }
-      );
-    }
-  }, [selectedInventory]); // Gunakan `selectedInventory` sebagai dependency
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
+    // Update formData dengan data dari selectedInventory
     setFormData((prevData) => ({
       ...prevData,
-      [name]: name === "price" ? value.replace(/\D/g, "") : value, // 🔥 Hanya hapus karakter selain angka untuk "price"
+      ...selectedInventory,
+      price: selectedInventory.price || "",
+      imagesnames: Array.isArray(selectedInventory.imagesnames)
+        ? selectedInventory.imagesnames
+        : [],
+    }));
+
+    // Format harga untuk tampilan
+    if (selectedInventory.price) {
+      setDisplayPrice(formatToRupiah(selectedInventory.price));
+    }
+
+    // Fetch images jika ada daftar nama gambar
+    if (selectedInventory.imagesnames?.length > 0) {
+      fetchImagesByNames(selectedInventory.imagesnames).then((fetchedImages) => {
+        setImages(fetchedImages);
+        if (fetchedImages.length > 0) {
+          setMainImage(fetchedImages[0]); // Set gambar pertama sebagai yang utama
+        }
+      });
+    }
+
+    // Panggil handleFetchImages untuk memastikan gambar diperbarui
+    handleFetchImages();
+  }, [selectedInventory, handleFetchImages]);
+
+  // Handle perubahan harga di input
+  const handlePriceChange = (e) => {
+    const rawValue = e.target.value.replace(/\D/g, ""); // Hanya angka
+    setFormData((prevData) => ({
+      ...prevData,
+      price: rawValue, // Simpan angka asli
+    }));
+    setDisplayPrice(rawValue); // Tampilkan angka mentah di input saat mengetik
+  };
+
+  // Format harga saat input kehilangan fokus
+  const handlePriceBlur = () => {
+    setDisplayPrice(formatToRupiah(formData.price));
+  };
+
+  // Handle perubahan input lainnya
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: name === "price" ? value.replace(/\D/g, "") : value,
     }));
   };
 
+  // Handle delete image
+  const handleDelete = (image) => {
+    setDeletedImages((prev) => [...prev, image.imageName]);
+    const updatedImages = images.filter((img) => img.imageName !== image.imageName);
+    setImages(updatedImages);
+
+    // Jika gambar utama yang dihapus, ganti dengan gambar lain atau set ke null
+    if (mainImage && image.imageName === mainImage.imageName) {
+      setMainImage(updatedImages.length > 0 ? updatedImages[0] : null);
+    }
+  };
+
+  // Handle file upload (convert to base64 untuk preview)
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      const base64Image = await convertToBase64(file);
+      const newImage = {
+        imageName: file.name,
+        imageData: base64Image, // Base64 untuk preview
+      };
+
+      setImages((prevImages) => [...prevImages, newImage]); // Update preview
+      setPendingImages((prev) => [...prev, newImage]); // Simpan untuk diupload nanti
+
+      toast.success("Image added to preview!");
+    } catch (error) {
+      console.error("Error processing image:", error);
+      toast.error("Failed to process image");
+    }
+  };
+
+  // Handle update inventory
   const handleUpdate = async () => {
     try {
-      // 1️⃣ Hapus gambar yang dihapus dari server sebelum update
+      // Hapus gambar dari server sebelum update
       if (deletedImages.length > 0) {
         const success = await deleteImagesFromServer(deletedImages);
         if (!success) {
@@ -204,7 +153,7 @@ const EditModal = ({
         }
       }
 
-      // 2️⃣ Upload semua gambar baru di `pendingImages`
+      // Upload semua gambar baru di `pendingImages`
       const uploadedImageNames = [];
       for (const image of pendingImages) {
         const uploadedName = await handleImageUpload(image);
@@ -212,14 +161,14 @@ const EditModal = ({
           uploadedImageNames.push(uploadedName);
         } else {
           toast.error(`Failed to upload image: ${image.imageName}`);
-          return; // Hentikan jika ada gambar gagal diupload
+          return;
         }
       }
 
-      // 3️⃣ Hapus deletedImages dari formData.imagesnames sebelum update
+      // Hapus deletedImages dari imagesnames sebelum update
       const updatedImagesNames = [
         ...formData.imagesnames.filter((name) => !deletedImages.includes(name)),
-        ...uploadedImageNames, // Tambahkan gambar baru yang berhasil diupload
+        ...uploadedImageNames, // Tambahkan gambar baru
       ];
 
       const updatedFormData = {
@@ -227,7 +176,7 @@ const EditModal = ({
         imagesnames: updatedImagesNames,
       };
 
-      // 4️⃣ Update inventory setelah upload selesai
+      // Update inventory di server
       const response = await fetch(`/api/inventory/${formData._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -243,14 +192,13 @@ const EditModal = ({
 
       // Reset state setelah update
       setDeletedImages([]);
-      setPendingImages([]); // Kosongkan antrian upload setelah update
+      setPendingImages([]);
       closeModal();
     } catch (error) {
       console.error("Error updating inventory:", error);
       toast.error("Failed to update inventory");
     }
   };
-
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
       <div className="bg-white p-6 rounded-md w-2/3">
