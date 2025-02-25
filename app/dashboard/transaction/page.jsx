@@ -4,7 +4,7 @@ import NavbarAdmin from '../../../components/NavBar/NavbarAdmin'
 import Provider from "@components/Provider";
 import { useSession } from 'next-auth/react';
 import SidebarTransaction from '../../../components/Sidebar/SidebarTransaction';
-
+import TransactionAdd from '../../../components/Transaction/TransactionAdd';	
 const DashboardTransactionContent = ({ activeButton, }) => {
     const { data: session } = useSession();
     switch (activeButton) {
@@ -18,11 +18,7 @@ const DashboardTransactionContent = ({ activeButton, }) => {
             );
         case 'Add New Transaction':
             return (
-                <div>
-                    <h2 className="text-2xl font-bold">Add New Transaction</h2>
-                    <p>Add New Transaction...</p>
-                    {/* Add your task content here */}
-                </div>
+                <TransactionAdd/>
             );
         case 'Transaction Details':
             return (
@@ -103,7 +99,7 @@ function payments() {
                     />
 
                     {/* Main Content Section */}
-                    <div className="flex-1 p-8 overflow-auto rounded-[20px] border border-gray-500 m-3 bg-[#fefdfb]">
+                    <div className="flex-1 p-5 overflow-auto rounded-[20px] border border-gray-500 m-3 bg-[#fefdfb]">
                         <DashboardTransactionContent activeButton={activeButton} />
                     </div>
                 </div>

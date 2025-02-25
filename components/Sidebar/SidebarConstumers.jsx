@@ -1,87 +1,71 @@
-// components/Sidebar.jsx
 import React from 'react';
 import { IoIosSettings } from "react-icons/io";
-import { TbHelpSquareRoundedFilled } from "react-icons/tb";
-import { TbReportSearch } from "react-icons/tb";
-import { MdOutbox ,MdGridView, MdPersonAdd,   } from "react-icons/md";
+import { TbHelpSquareRoundedFilled, TbReportSearch } from "react-icons/tb";
+import { MdOutbox, MdGridView, MdPersonAdd } from "react-icons/md";
+
 const SidebarConstumers = ({ activeButton, setActiveButton }) => {
-
     return (
-        <aside className="w-64 flex-shrink-0 p-4 flex flex-col justify-between">
-            <div>
-                <h2 className="text-2xl font-bold mb-8">Customers</h2>
+        <aside className="flex-shrink-0 p-4 flex flex-col h-full">
+            {/* Top spacing */}
+            <div className="flex-1"></div>
+
+            {/* Centered section */}
+            <div className='bg-[#efefef] p-3 rounded-full mx-auto shadow-md'>
                 <ul className="space-y-2">
-                    {/* Overview Menu */}
                     <li>
-                        <a
-                            href="#"
+                        <div
                             onClick={() => setActiveButton('Customer List')}
-                            className={`${activeButton === 'Customer List' ? 'active' : ''} sidebar_btn`}
+                            className={`${activeButton === 'Customer List' ? 'active' : ''} sidebar_btnnew`}
                         >
-                            <MdGridView className="mr-2" />
-                            Customer List
-                        </a>
+                            <MdGridView className="text-xl" />
+                        </div>
                     </li>
-
-                    {/* in product */}
                     <li>
-                        <a
-                            onClick={() => setActiveButton('Add New Customer')} // Set activeButton to 'tracking'
-                            className={`${activeButton === 'Add New Customer' ? 'active' : ''} sidebar_btn`}
-
+                        <div
+                            onClick={() => setActiveButton('Add New Customer')}
+                            className={`${activeButton === 'Add New Customer' ? 'active' : ''} sidebar_btnnew`}
                         >
-                            <MdPersonAdd  className="mr-2" />
-                            Add New Customer 
-                        </a>
+                            <MdPersonAdd className="text-xl" />
+                        </div>
                     </li>
-
-                      {/* out product */}
-                      <li>
-                        <a
-                            onClick={() => setActiveButton('Customer Profile')} // Set activeButton to 'tracking'
-                            className={`${activeButton === 'Customer Profile' ? 'active' : ''} sidebar_btn`}
-
-                        >
-                            <MdOutbox  className="mr-2" />
-                            Customer Profile 
-                        </a>
-                    </li>
-
-                    {/* Reports Menu */}
                     <li>
-                        <a
-                            onClick={() => setActiveButton('Service History')} // Set activeButton to 'tracking'
-                            className={`${activeButton === 'Service History' ? 'active' : ''} sidebar_btn`}
-
+                        <div
+                            onClick={() => setActiveButton('Customer Profile')}
+                            className={`${activeButton === 'Customer Profile' ? 'active' : ''} sidebar_btnnew`}
                         >
-                            <TbReportSearch className='mr-2'/>
-                            Service History 
-                        </a>
+                            <MdOutbox className="text-xl" />
+                        </div>
+                    </li>
+                    <li>
+                        <div
+                            onClick={() => setActiveButton('Service History')}
+                            className={`${activeButton === 'Service History' ? 'active' : ''} sidebar_btnnew`}
+                        >
+                            <TbReportSearch className='text-xl'/>
+                        </div>
                     </li>
                 </ul>
             </div>
 
-            {/* Settings Menu at the Bottom */}
-            <div className="mt-auto space-y-2">
-                
-                <a
-                    onClick={() => setActiveButton('Help Center')} // Set activeButton to 'tracking'
-                    className={`${activeButton === 'Help Center' ? 'active' : ''} sidebar_btn`}
+            {/* Bottom spacing */}
+            <div className="flex-1"></div>
 
+            {/* Settings Menu at the Bottom */}
+            <div className="space-y-2">
+                <a
+                    onClick={() => setActiveButton('Help Center')}
+                    className={`${activeButton === 'Help Center' ? 'active' : ''} sidebar_btnnew`}
                 >
                     <TbHelpSquareRoundedFilled className="mr-2" />
                     Help Center
                 </a>
                 <a
-                    onClick={() => setActiveButton('Settings')} // Set activeButton to 'tracking'
-                    className={`${activeButton === 'Settings' ? 'active' : ''} sidebar_btn`}
-
+                    onClick={() => setActiveButton('Settings')}
+                    className={`${activeButton === 'Settings' ? 'active' : ''} sidebar_btnnew`}
                 >
                     <IoIosSettings className="mr-2" />
                     Settings
                 </a>
-
-
             </div>
         </aside>
     );

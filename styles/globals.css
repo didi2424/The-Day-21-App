@@ -75,9 +75,7 @@
   @apply inline-flex items-center justify-center rounded-full border border-gray-300 p-2 w-10 h-10;
 }
 
-.sidebar_btn {
-  @apply hover:bg-gray-700 hover:text-white rounded-md p-2 flex text-sm items-center;
-}
+
 
 .topactive_btn {
   @apply  rounded-full border bg-[#b9ec8f] py-1.5 px-5 text-black transition-all hover:bg-black hover:text-white text-center text-sm font-medium font-inter flex items-center justify-center;
@@ -87,12 +85,22 @@
   @apply  rounded-full border border-white bg-transparent py-1.5 px-5 text-gray-900 transition-all hover:bg-black hover:text-white text-center text-sm font-inter flex items-center justify-center;
 }
 
+.sidebar_btn {
+  @apply hover:bg-gray-700 hover:text-white rounded-md p-2 flex text-sm items-center;
+}
 .sidebar_btn.active {
   background-color: #b9ec8f;
   color: black;
   font-weight: 500;  /* Ganti ini dengan nilai yang sesuai jika ingin font lebih tebal */
 }
 
+.sidebar_btnnew {
+  @apply hover:bg-gray-700 hover:text-white rounded-full p-2 flex items-center justify-center w-12 h-12;
+}
+
+.sidebar_btnnew.active {
+  @apply bg-[#b9ec8f] text-black font-bold rounded-full w-12 h-12;
+}
 .outline_btn {
   @apply rounded-full border border-black bg-transparent py-1.5 px-5 text-black transition-all hover:bg-black hover:text-white text-center text-sm font-inter flex items-center justify-center;
 }

@@ -18,15 +18,6 @@ export async function GET(request) {
       .skip((page - 1) * pageSize)
       .limit(pageSize);
 
-    // Log untuk debugging
-    console.log('API Response:', {
-      page,
-      pageSize,
-      totalCustomers,
-      customersReturned: customers.length,
-      totalPages: Math.ceil(totalCustomers / pageSize)
-    });
-
     return new Response(
       JSON.stringify({
         customers,

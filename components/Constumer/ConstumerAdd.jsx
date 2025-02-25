@@ -20,6 +20,13 @@ const CustomerAdd = () => {
 
   const [isFormValid, setIsFormValid] = useState(false);
 
+  const toggleStatus = () => {
+    setFormData((prev) => ({
+      ...prev,
+      status: prev.status === "active" ? "deactive" : "active",
+    }));
+  };
+
   // Function to check if all required fields are filled
   const checkFormValidity = () => {
     const allFieldsFilled = Object.values(formData).every((value) => value.trim() !== '');
@@ -221,14 +228,23 @@ const CustomerAdd = () => {
                 </div>
 
                 <div>
-                <div className="font-medium text-sm">Status</div>
-                <input
-                  type="text"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className="w-full rounded-md bg-[#efefef] p-2"
-                />
+
+
+<div>
+          <div className="text-sm font-bold ">Status</div>
+          <div
+            className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition ${
+              formData.status === "active" ? "bg-green-500" : "bg-orange-500"
+            }`}
+            onClick={toggleStatus}
+          >
+            <div
+              className={`w-6 h-6 bg-white rounded-full shadow-md transform transition ${
+                formData.status === "active" ? "translate-x-6" : "translate-x-0"
+              }`}
+            ></div>
+          </div>
+        </div>
                 </div>
               </div>
 

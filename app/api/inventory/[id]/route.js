@@ -69,3 +69,48 @@ export const PATCH = async (request, context) => {
     );
   }
 };
+
+export async function GET(request, context) {
+  try {
+    await connectToDB();
+
+    // Wait for params to be available
+    const params = await context.params;
+    if (!params || !params.id) {
+      return new Response(JSON.stringify({ error: "Missing inventory ID" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const id = params.id;
+
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return new Response(JSON.stringify({ error: "Invalid inventory ID format" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const item = await Inventory.findById(id);
+    
+    if (!item) {
+      return new Response(JSON.stringify({ error: "Item not found" }), { 
+        status: 404,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    return new Response(JSON.stringify(item), { 
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  } catch (error) {
+    console.error("Error fetching inventory item:", error);
+    return new Response(JSON.stringify({ error: "Failed to fetch item" }), { 
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+}

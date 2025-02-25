@@ -1,88 +1,71 @@
-// components/Sidebar.jsx
 import React from 'react';
 import { IoIosSettings } from "react-icons/io";
 import { TbHelpSquareRoundedFilled } from "react-icons/tb";
-import { MdOutbox ,MdGridView, MdAdd,MdPlaylistAddCheck,MdSubject      } from "react-icons/md";
-
+import { MdOutbox, MdAdd, MdSubject, MdPlaylistAddCheck } from "react-icons/md";
 
 const SidebarTransaction = ({ activeButton, setActiveButton }) => {
-
     return (
-        <aside className="w-64 flex-shrink-0 p-4 flex flex-col justify-between">
-            <div>
-                <h2 className="text-2xl font-bold mb-8">Transaction</h2>
+        <aside className="flex-shrink-0 p-4 flex flex-col h-full">
+            {/* Top spacing */}
+            <div className="flex-1"></div>
+
+            {/* Centered section */}
+            <div className='bg-[#efefef] p-3 rounded-full mx-auto shadow-md'>
                 <ul className="space-y-2">
-                    {/* Overview Menu */}
                     <li>
-                        <a
-                            href="#"
+                        <div
                             onClick={() => setActiveButton('transaction')}
-                            className={`${activeButton === 'transaction' ? 'active' : ''} sidebar_btn`}
+                            className={`${activeButton === 'transaction' ? 'active' : ''} sidebar_btnnew`}
                         >
-                            <MdSubject className="mr-2" />
-                            Transaction List
-                        </a>
+                            <MdSubject className="text-xl" />
+                        </div>
                     </li>
-
-                    {/* in product */}
                     <li>
-                        <a
-                            onClick={() => setActiveButton('Add New Transaction')} // Set activeButton to 'tracking'
-                            className={`${activeButton === 'Add New Transaction' ? 'active' : ''} sidebar_btn`}
-
+                        <div
+                            onClick={() => setActiveButton('Add New Transaction')}
+                            className={`${activeButton === 'Add New Transaction' ? 'active' : ''} sidebar_btnnew`}
                         >
-                            <MdAdd  className="mr-2" />
-                            Add New Transaction
-                        </a>
+                            <MdAdd className="text-xl" />
+                        </div>
                     </li>
-
-                      {/* out product */}
-                      <li>
-                        <a
-                            onClick={() => setActiveButton('Transaction Details')} // Set activeButton to 'tracking'
-                            className={`${activeButton === 'Transaction Details' ? 'active' : ''} sidebar_btn`}
-
-                        >
-                            <MdOutbox  className="mr-2" />
-                            Transaction Details
-                        </a>
-                    </li>
-
-                    {/* Reports Menu */}
                     <li>
-                        <a
-                            onClick={() => setActiveButton('reports')} // Set activeButton to 'tracking'
-                            className={`${activeButton === 'reports' ? 'active' : ''} sidebar_btn`}
-
+                        <div
+                            onClick={() => setActiveButton('Transaction Details')}
+                            className={`${activeButton === 'Transaction Details' ? 'active' : ''} sidebar_btnnew`}
                         >
-                            <MdPlaylistAddCheck className='mr-2'/>
-                            Reports 
-                        </a>
+                            <MdOutbox className="text-xl" />
+                        </div>
+                    </li>
+                    <li>
+                        <div
+                            onClick={() => setActiveButton('reports')}
+                            className={`${activeButton === 'reports' ? 'active' : ''} sidebar_btnnew`}
+                        >
+                            <MdPlaylistAddCheck className='text-xl'/>
+                        </div>
                     </li>
                 </ul>
             </div>
 
-            {/* Settings Menu at the Bottom */}
-            <div className="mt-auto space-y-2">
-                
-                <a
-                    onClick={() => setActiveButton('Help Center')} // Set activeButton to 'tracking'
-                    className={`${activeButton === 'Help Center' ? 'active' : ''} sidebar_btn`}
+            {/* Bottom spacing */}
+            <div className="flex-1"></div>
 
+            {/* Settings Menu at the Bottom */}
+            <div className="space-y-2">
+                <a
+                    onClick={() => setActiveButton('Help Center')}
+                    className={`${activeButton === 'Help Center' ? 'active' : ''} sidebar_btnnew`}
                 >
                     <TbHelpSquareRoundedFilled className="mr-2" />
                     Help Center
                 </a>
                 <a
-                    onClick={() => setActiveButton('Settings')} // Set activeButton to 'tracking'
-                    className={`${activeButton === 'Settings' ? 'active' : ''} sidebar_btn`}
-
+                    onClick={() => setActiveButton('Settings')}
+                    className={`${activeButton === 'Settings' ? 'active' : ''} sidebar_btnnew`}
                 >
                     <IoIosSettings className="mr-2" />
                     Settings
                 </a>
-
-
             </div>
         </aside>
     );

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import EditModal from "./EditModal";
 import { MdPersonSearch, MdOutlineTimelapse, MdClose } from "react-icons/md"; // Tambah MdClose
+import { useRouter } from 'next/navigation';
 
 const StockList = () => {
   const [inventory, setInventory] = useState([]);
@@ -15,6 +16,8 @@ const StockList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+
+  const router = useRouter();
 
   // Debounce search term
   useEffect(() => {
@@ -125,9 +128,13 @@ const refreshData = async () => {
   }
 };
 
+const handleViewDetails = (itemId) => {
+  router.push(`/inventory/details/${itemId}`);
+};
+
   return (
-    <div >
-      <div className="flex justify-between items-center mb-4">
+    <div className="flex flex-col h-full">
+      <div className="h-[50px] flex justify-between mb-4">
         <h2 className="text-2xl font-bold">Stock List</h2>
         <div className="relative w-full max-w-md">
           <input
@@ -135,7 +142,7 @@ const refreshData = async () => {
             placeholder="Search by name, SKU, or category..."
             value={searchTerm}
             onChange={handleSearch}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+            className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none"
           />
           {searchTerm && (
             <button
@@ -152,81 +159,87 @@ const refreshData = async () => {
           )}
         </div>
       </div>
-      {inventory.length > 0 ? (
-        <ul>
-          {inventory.map((item) => {
-            const matchedImages = getImagesForItem(item.imagesnames);
 
-            return (
-              <li key={item.id || item._id} className="mb-4">
-                <div className="p-2 shadow-sm rounded-lg  bg-white">
-                  <div className="grid grid-cols-8 gap-4 items-center">
-                    <div>
-                      <div className="font-bold text-lg">{item.name}</div>
-                      <div className="text-gray-500">
-                        Price: Rp. {new Intl.NumberFormat("id-ID").format(item.price)},-
+      <div className="flex-1 overflow-auto pb-4">
+        {inventory.length > 0 ? (
+          <ul>
+            {inventory.map((item) => {
+              const matchedImages = getImagesForItem(item.imagesnames);
+
+              return (
+                <li key={item.id || item._id} className="mb-4">
+                  <div className="pb-2 pt-2 pl-6 pr-6 shadow-sm rounded-lg  bg-white">
+                    <div className="grid grid-cols-8 gap-4 items-center">
+                      <div>
+                        <div className="font-bold text-lg">{item.name}</div>
+                        <div className="text-gray-500">
+                          Price: Rp. {new Intl.NumberFormat("id-ID").format(item.price)},-
+                        </div>
+                      </div>
+                      <div>Stock: {item.stock}</div>
+                      <div>
+                        <div>Storage: {item.stroage}</div>
+                        <div>Row Column: R{item.row} C{item.column}</div>
+                      </div>
+                      <div>
+                        <div>{item.manufacture}</div>
+                        <div className="text-gray-500">Category: {item.category}</div>
+                      </div>
+                      <div>
+                        <div>SKU: {item.sku}</div>
+                        <div className="text-gray-500">Condition: {item.condition}</div>
+                      </div>
+                      <div className="flex gap-5">
+                        <button 
+                          onClick={() => handleViewDetails(item._id)}
+                          className="text-white font-bold text-sm bg-black rounded-md py-1 px-3 hover:bg-gray-800 transition-colors"
+                        >
+                          Description
+                        </button>
+                        <button onClick={() => handleEdit(item)} className="text-white font-bold text-sm bg-green-500 hover:bg-green-600 rounded-md py-1 px-3 transition-colors">
+                          Edit
+                        </button>
+                      </div>
+                      <div className="flex space-x-2">
+                        {matchedImages.length > 0 ? (
+                          matchedImages.map((img, index) => (
+                            <div key={`${item._id}-${index}`} className="relative">
+                              <img src={img.imageData} alt={img.imageName || "No Image"} className="w-20 h-20 object-cover rounded-md" />
+                            </div>
+                          ))
+                        ) : (
+                          <div className="w-20 h-20 bg-gray-300 rounded-md flex items-center justify-center">
+                            <span className="text-xs text-gray-500">No Image</span>
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <div>Stock: {item.stock}</div>
-                    <div>
-                      <div>Storage: {item.stroage}</div>
-                      <div>Row Column: R{item.row} C{item.column}</div>
-                    </div>
-                    <div>
-                      <div>{item.manufacture}</div>
-                      <div className="text-gray-500">Category: {item.category}</div>
-                    </div>
-                    <div>
-                      <div>SKU: {item.sku}</div>
-                      <div className="text-gray-500">Condition: {item.condition}</div>
-                    </div>
-                    <div className="flex gap-5">
-                      <button className="text-white font-bold text-sm bg-black rounded-md py-1 px-3">
-                        Description
-                      </button>
-                      <button onClick={() => handleEdit(item)} className="text-white font-bold text-sm bg-green-500 hover:bg-green-600 rounded-md py-1 px-3 transition-colors">
-                        Edit
-                      </button>
-                    </div>
-                    <div className="flex space-x-2">
-                      {matchedImages.length > 0 ? (
-                        matchedImages.map((img, index) => (
-                          <div key={`${item._id}-${index}`} className="relative">
-                            <img src={img.imageData} alt={img.imageName || "No Image"} className="w-20 h-20 object-cover rounded-md" />
-                          </div>
-                        ))
-                      ) : (
-                        <div className="w-20 h-20 bg-gray-300 rounded-md flex items-center justify-center">
-                          <span className="text-xs text-gray-500">No Image</span>
-                        </div>
-                      )}
-                    </div>
                   </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <p className="text-gray-500">No inventory items available</p>
-      )}
-      {isModalOpen && (
-        <EditModal
-          isModalOpen={isModalOpen}
-          closeModal={closeModal}
-          selectedInventory={selectedInventory}
-          refreshData={refreshData}
-        />
-      )}
-        <div className="flex justify-between mt-4">
-        <p className="mt-2 text-sm">Page {currentPage} of {totalPages}</p>
-        <div className='gap-4 flex'>
-          <button onClick={handlePrevPage} disabled={currentPage === 1} className={`next_btn ${currentPage === 1 ? 'cursor-not-allowed opacity-50' : 'hover:bg-[b9ec8f]'}`}>
-            Back
-          </button>
-          <button onClick={handleNextPage} disabled={currentPage === totalPages} className={`next_btn ${currentPage === totalPages ? 'cursor-not-allowed opacity-50' : 'hover:bg-[b9ec8f]'}`}>
-            Next
-          </button>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="text-gray-500">No inventory items available</p>
+        )}
+        {isModalOpen && (
+          <EditModal
+            isModalOpen={isModalOpen}
+            closeModal={closeModal}
+            selectedInventory={selectedInventory}
+            refreshData={refreshData}
+          />
+        )}
+          <div className="flex justify-between mt-4">
+          <p className="mt-2 text-sm">Page {currentPage} of {totalPages}</p>
+          <div className='gap-4 flex'>
+            <button onClick={handlePrevPage} disabled={currentPage === 1} className={`next_btn ${currentPage === 1 ? 'cursor-not-allowed opacity-50' : 'hover:bg-[b9ec8f]'}`}>
+              Back
+            </button>
+            <button onClick={handleNextPage} disabled={currentPage === totalPages} className={`next_btn ${currentPage === totalPages ? 'cursor-not-allowed opacity-50' : 'hover:bg-[b9ec8f]'}`}>
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -156,8 +156,8 @@ const StockAdd = () => {
   };
   return (
     <div>
-      <div className="flex flex-1 justify-between items-center">
-        <h2 className="text-2xl font-bold">Stock add</h2>
+      <div className="">
+        <h2 className="text-2xl font-bold">Stock Add</h2>
         {/* Button to open the modal */}
       </div>
 
