@@ -137,6 +137,7 @@ const CustomerList = () => {
   const searchCustomers = useCallback(async () => {
     if (!debouncedSearchTerm) {
       return fetchCustomers();
+      
     }
 
     setIsSearching(true);
