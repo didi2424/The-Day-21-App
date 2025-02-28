@@ -1,6 +1,6 @@
-import { Schema, model, models } from "mongoose";
+import mongoose from 'mongoose';
 
-const ConstumerSchema = new Schema({
+const ConstumerSchema = new mongoose.Schema({
   wa_number: {
     type: String,
     required: [true, "WhatsApp number is required"],
@@ -49,6 +49,4 @@ const ConstumerSchema = new Schema({
   },
 }, { timestamps: true });
 
-const Constumer = models.Constumer || model("Constumer", ConstumerSchema);
-
-export default Constumer;
+export default mongoose.models.Constumer || mongoose.model('Constumer', ConstumerSchema);

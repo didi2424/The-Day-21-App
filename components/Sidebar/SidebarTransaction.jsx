@@ -1,7 +1,7 @@
 import React from 'react';
 import { IoIosSettings } from "react-icons/io";
 import { TbHelpSquareRoundedFilled } from "react-icons/tb";
-import { MdOutbox, MdAdd, MdSubject, MdPlaylistAddCheck } from "react-icons/md";
+import { MdOutbox, MdAdd, MdSubject, MdPlaylistAddCheck,MdInsertDriveFile  } from "react-icons/md";
 
 const SidebarTransaction = ({ activeButton, setActiveButton }) => {
     return (
@@ -33,13 +33,13 @@ const SidebarTransaction = ({ activeButton, setActiveButton }) => {
                             onClick={() => setActiveButton('Transaction Details')}
                             className={`${activeButton === 'Transaction Details' ? 'active' : ''} sidebar_btnnew`}
                         >
-                            <MdOutbox className="text-xl" />
+                            <MdInsertDriveFile className="text-xl" />
                         </div>
                     </li>
                     <li>
                         <div
-                            onClick={() => setActiveButton('reports')}
-                            className={`${activeButton === 'reports' ? 'active' : ''} sidebar_btnnew`}
+                            onClick={() => setActiveButton('Transaction Update')}
+                            className={`${activeButton === 'Transaction Update' ? 'active' : ''} sidebar_btnnew`}
                         >
                             <MdPlaylistAddCheck className='text-xl'/>
                         </div>

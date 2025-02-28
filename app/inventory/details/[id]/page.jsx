@@ -27,7 +27,6 @@ const InventoryDetails = ({ params }) => {
         
         if (data.imagesnames && data.imagesnames.length > 0) {
           const fetchedImages = await fetchImagesByNames(data.imagesnames);
-          console.log('Fetched images:', fetchedImages);
           setImages({ images: fetchedImages }); // Match the expected structure
         }
       } catch (error) {

@@ -3,39 +3,54 @@ import React, { useState, useEffect } from 'react'
 import NavbarAdmin from '../../../components/NavBar/NavbarAdmin'
 import Provider from "@components/Provider";
 import { useSession } from 'next-auth/react';
+import { MdArrowBack } from "react-icons/md"; // Add this import
 import SidebarTransaction from '../../../components/Sidebar/SidebarTransaction';
 import TransactionAdd from '../../../components/Transaction/TransactionAdd';	
-const DashboardTransactionContent = ({ activeButton, }) => {
+import TransactionList from '../../../components/Transaction/TransactionList';
+import TransactionDetail from '../../../components/Transaction/TransactionDetail';
+import TransactionUpdate from '../../../components/Transaction/TransactionUpdate';
+
+const DashboardTransactionContent = ({ activeButton, selectedTransactionId, setActiveButton, setSelectedTransactionId }) => {
     const { data: session } = useSession();
+    
     switch (activeButton) {
         case 'transaction':
-            return (
-                <div>
-                    <h2 className="text-2xl font-bold">Transaction List</h2>
-                    <p>Here are your transaction data...</p>
-                    {/* Add your statistics content here */}
-                </div>
-            );
+            return <TransactionList 
+              setActiveButton={setActiveButton}
+              setSelectedTransactionId={setSelectedTransactionId}
+            />;
+            
         case 'Add New Transaction':
-            return (
-                <TransactionAdd/>
-            );
+            return <TransactionAdd />;
+            
         case 'Transaction Details':
-            return (
+            return selectedTransactionId ? (
+                <div className="w-full">
+                    <button
+                        onClick={() => {
+                            setActiveButton('transaction');
+                            setSelectedTransactionId(null);
+                        }}
+                        className="mb-4 flex items-center text-gray-600 hover:text-gray-900"
+                    >
+                        <MdArrowBack className="mr-2" />
+                        Back to Transaction List
+                    </button>
+                    <TransactionDetail transactionId={selectedTransactionId} />
+                </div>
+            ) : (
                 <div>
-                    <h2 className="text-2xl font-bold">Transaction Details</h2>
-                    <p>Transaction Detailss...</p>
-                    {/* Add your reports content here */}
+                   <h2 className="text-2xl font-bold">Transaction Details</h2>
+                   <p className="text-gray-500 mt-2">Please select a transaction</p>
                 </div>
             );
-        case 'reports':
-            return (
-                <div>
-                    <h2 className="text-2xl font-bold">Stock Report</h2>
-                    <p>Configure your settings...</p>
-                    {/* Add your settings content here */}
-                </div>
-            );
+
+        case 'Transaction Update':
+            return <TransactionUpdate 
+                setActiveButton={setActiveButton} 
+                selectedTransactionId={selectedTransactionId}
+            />;
+            
         case 'Help Center':
             return (
                 <div>
@@ -61,46 +76,54 @@ const DashboardTransactionContent = ({ activeButton, }) => {
 }
 
 function payments() {
-    // State to track the active button
     const [activeButton, setActiveButton] = useState(null);
+    const [selectedTransactionId, setSelectedTransactionId] = useState(null);
+
+    // Handle query parameter on component mount
+    useEffect(() => {
+        const searchParams = new URLSearchParams(window.location.search);
+        const view = searchParams.get('view');
+        const transactionId = searchParams.get('id');
+        
+        if (view === 'transaction') {
+            setActiveButton('transaction');
+        } else if (transactionId) {
+            setActiveButton('Transaction Details');
+            setSelectedTransactionId(transactionId);
+        }
+    }, []);
 
     const getBreadcrumb = () => {
         const basePath = 'Dashboard > Transaction';
-        if (!activeButton) return basePath; // Just show the base path if no submenu is selected
-        return `${basePath} > ${activeButton.charAt(0).toUpperCase() + activeButton.slice(1)}`; // Capitalize the active button name
+        if (!activeButton) return basePath;
+        return `${basePath} > ${activeButton.charAt(0).toUpperCase() + activeButton.slice(1)}`;
     };
-
-
 
     return (
         <Provider>
             <div className="h-screen flex flex-col w-full">
-                {/* Navbar */}
                 <header className="p-4">
-
                     <NavbarAdmin />
-
                 </header>
                 <div className='justify-between flex pr-4 pl-4'>
-                <div className="text-sm">
+                    <div className="text-sm">
                         {getBreadcrumb()}
                     </div>
-
                     <div>
-                        
                     </div>
                 </div>
-                {/* Main Content (Flex container) */}
                 <div className="flex flex-1">
-                    {/* Sidebar */}
                     <SidebarTransaction
                         activeButton={activeButton}
                         setActiveButton={setActiveButton}
                     />
-
-                    {/* Main Content Section */}
                     <div className="flex-1 p-5 overflow-auto rounded-[20px] border border-gray-500 m-3 bg-[#fefdfb]">
-                        <DashboardTransactionContent activeButton={activeButton} />
+                        <DashboardTransactionContent 
+                            activeButton={activeButton}
+                            selectedTransactionId={selectedTransactionId}
+                            setActiveButton={setActiveButton}
+                            setSelectedTransactionId={setSelectedTransactionId}
+                        />
                     </div>
                 </div>
             </div>

@@ -1,12 +1,9 @@
-import mongoose from 'mongoose';
+import { Schema, model, models } from 'mongoose';
 
-const transactionImageSchema = new mongoose.Schema({
-  imageName: {
-    type: String,
-    required: true
-  },
-  imageData: {
-    type: String,  // Base64 string
+const TransactionImageSchema = new Schema({
+  transactionId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Transaction',
     required: true
   },
   imageType: {
@@ -14,15 +11,14 @@ const transactionImageSchema = new mongoose.Schema({
     enum: ['main', 'additional'],
     required: true
   },
-  transactionId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Transaction',
+  imageData: {
+    type: String,
     required: true
   },
-  uploadedAt: {
+  createdAt: {
     type: Date,
     default: Date.now
   }
 });
 
-export default mongoose.models.TransactionImage || mongoose.model('TransactionImage', transactionImageSchema);
+export default models.TransactionImage || model('TransactionImage', TransactionImageSchema);
