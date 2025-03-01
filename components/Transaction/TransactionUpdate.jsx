@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import Image from 'next/image';
 import { MdClose } from 'react-icons/md';
 import DeviceImageEdit from './DeviceImageEdit';
+import TransactionUpdatePage2 from './TransactionUpdatePage2';
 
 const TransactionUpdate = ({ setActiveButton, selectedTransactionId }) => {
   const [transaction, setTransaction] = useState(null);
@@ -24,6 +25,7 @@ const TransactionUpdate = ({ setActiveButton, selectedTransactionId }) => {
   const [mainImageBase64, setMainImageBase64] = useState('');
   const [additionalImagesBase64, setAdditionalImagesBase64] = useState([]);
   const [formStep, setFormStep] = useState(1); // Add this state
+  const [currentComponent, setCurrentComponent] = useState('basic'); // Add this state
 
   // Options for form selects
   const commonIssuesOptions = [
@@ -179,6 +181,40 @@ const TransactionUpdate = ({ setActiveButton, selectedTransactionId }) => {
     }
   };
 
+  const handleImageSubmit = async (imageData) => {
+    try {
+      const updateData = {
+        ...formData,
+        customer: transaction.customer?._id,
+        selectedIssues: selectedIssues.map(issueId => ({
+          id: issueId,
+          label: commonIssuesOptions.find(opt => opt.id === issueId)?.label
+        })),
+        accessories: selectedAccessories.map(id => ({
+          id,
+          label: accessoryOptions.find(opt => opt.id === id)?.label
+        })),
+        images: imageData.images
+      };
+
+      const response = await fetch(`/api/transaction/${selectedTransactionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData)
+      });
+
+      if (response.ok) {
+        toast.success('Images updated successfully');
+        setCurrentComponent('hardware'); // Switch to hardware component
+      } else {
+        throw new Error('Failed to update transaction');
+      }
+    } catch (error) {
+      toast.error('Failed to update transaction');
+      console.error('Update error:', error);
+    }
+  };
+
   if (loading) return (
     <div>
       <h2 className="text-2xl font-bold">Transaction Update</h2>
@@ -197,6 +233,207 @@ const TransactionUpdate = ({ setActiveButton, selectedTransactionId }) => {
     setFormStep(2);
   };
 
+  const renderComponent = () => {
+    switch (currentComponent) {
+      case 'basic':
+        return formStep === 1 ? (
+          <form className="grid grid-cols-2 gap-6">
+            {/* Left Column */}
+            <div className="space-y-6">
+              {/* Customer Info */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold mb-4">Customer Information</h3>
+                <div className="space-y-2">
+                  <p><span className="text-gray-500">Name:</span> {transaction.customer?.constumer_name}</p>
+                  <p><span className="text-gray-500">Phone:</span> {transaction.customer?.wa_number}</p>
+                </div>
+              </div>
+
+              {/* Service Details */}
+              <div className="bg-gray-50 p-4 rounded-lg space-y-4">
+                <h3 className="font-semibold">Service Details</h3>
+                
+                {/* Device Model */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Device Model</label>
+                  <input
+                    type="text"
+                    name="deviceModel"
+                    value={formData.deviceModel}
+                    onChange={handleChange}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+
+                {/* Service Type */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Service Type</label>
+                  <select
+                    name="serviceType"
+                    value={formData.serviceType}
+                    onChange={handleChange}
+                    className="w-full p-2 border rounded"
+                  >
+                    {serviceTypeOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Status */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Status</label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="w-full p-2 border rounded"
+                  >
+                    {statusOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Technician */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Technician</label>
+                  <select
+                    name="technician"
+                    value={formData.technician}
+                    onChange={handleChange}
+                    className="w-full p-2 border rounded"
+                  >
+                    <option value="">Select Technician</option>
+                    {technicianOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-6">
+              {/* Issues & Accessories */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold mb-4">Issues & Accessories</h3>
+                
+                {/* Issues */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">Issues</label>
+                  <div className="flex flex-wrap gap-2">
+                    {commonIssuesOptions.map(issue => (
+                      <button
+                        key={issue.id}
+                        type="button"
+                        onClick={() => toggleIssue(issue.id)}
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          selectedIssues.includes(issue.id)
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-200 text-gray-700'
+                        }`}
+                      >
+                        {issue.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Accessories */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Accessories</label>
+                  <div className="flex flex-wrap gap-2">
+                    {accessoryOptions.map(acc => (
+                      <button
+                        key={acc.id}
+                        type="button"
+                        onClick={() => handleAccessoryToggle(acc.id)}
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          selectedAccessories.includes(acc.id)
+                            ? 'bg-green-500 text-white'
+                            : 'bg-gray-200 text-gray-700'
+                        }`}
+                      >
+                        {acc.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Description & Condition */}
+              <div className="bg-gray-50 p-4 rounded-lg space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Problem Description</label>
+                  <textarea
+                    name="problemDescription"
+                    value={formData.problemDescription}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Device Condition</label>
+                  <textarea
+                    name="deviceCondition"
+                    value={formData.deviceCondition}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Replace Submit Button with Next */}
+            <div className="col-span-2 flex justify-end gap-4 mt-6">
+              <button
+                type="button"
+                onClick={() => setActiveButton('transaction')}
+                className="px-4 py-2 border rounded-md hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleNext}
+                className="px-4 py-2 bg-[#b9ec8f] text-black rounded-md hover:bg-[#a5d880]"
+              >
+                Next: Edit Images
+              </button>
+            </div>
+          </form>
+        ) : (
+          <DeviceImageEdit
+            formStep={formStep}
+            setFormStep={setFormStep}
+            transaction={transaction}
+            handleSubmit={handleImageSubmit}
+            setCurrentComponent={setCurrentComponent}
+          />
+        );
+      case 'hardware':
+        return (
+          <TransactionUpdatePage2
+            selectedTransactionId={selectedTransactionId}
+            setActiveButton={setActiveButton}
+            setCurrentComponent={setCurrentComponent}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg p-6">
       <div className="flex justify-between items-center mb-6">
@@ -204,198 +441,9 @@ const TransactionUpdate = ({ setActiveButton, selectedTransactionId }) => {
           <h2 className="text-2xl font-bold">Edit Transaction</h2>
           <p className="text-gray-500">Transaction: {transaction.serviceNumber}</p>
         </div>
-        <button
-          onClick={() => setActiveButton('transaction')}
-          className="px-4 py-2 bg-[#b9ec8f] text-black rounded-md hover:bg-[#a5d880]"
-        >
-          Back
-        </button>
       </div>
 
-      {formStep === 1 ? (
-        <form className="grid grid-cols-2 gap-6">
-          {/* Left Column */}
-          <div className="space-y-6">
-            {/* Customer Info */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold mb-4">Customer Information</h3>
-              <div className="space-y-2">
-                <p><span className="text-gray-500">Name:</span> {transaction.customer?.constumer_name}</p>
-                <p><span className="text-gray-500">Phone:</span> {transaction.customer?.wa_number}</p>
-              </div>
-            </div>
-
-            {/* Service Details */}
-            <div className="bg-gray-50 p-4 rounded-lg space-y-4">
-              <h3 className="font-semibold">Service Details</h3>
-              
-              {/* Device Model */}
-              <div>
-                <label className="block text-sm font-medium mb-1">Device Model</label>
-                <input
-                  type="text"
-                  name="deviceModel"
-                  value={formData.deviceModel}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-
-              {/* Service Type */}
-              <div>
-                <label className="block text-sm font-medium mb-1">Service Type</label>
-                <select
-                  name="serviceType"
-                  value={formData.serviceType}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                >
-                  {serviceTypeOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Status */}
-              <div>
-                <label className="block text-sm font-medium mb-1">Status</label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                >
-                  {statusOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Technician */}
-              <div>
-                <label className="block text-sm font-medium mb-1">Technician</label>
-                <select
-                  name="technician"
-                  value={formData.technician}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                >
-                  <option value="">Select Technician</option>
-                  {technicianOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-6">
-            {/* Issues & Accessories */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold mb-4">Issues & Accessories</h3>
-              
-              {/* Issues */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Issues</label>
-                <div className="flex flex-wrap gap-2">
-                  {commonIssuesOptions.map(issue => (
-                    <button
-                      key={issue.id}
-                      type="button"
-                      onClick={() => toggleIssue(issue.id)}
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        selectedIssues.includes(issue.id)
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-200 text-gray-700'
-                      }`}
-                    >
-                      {issue.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Accessories */}
-              <div>
-                <label className="block text-sm font-medium mb-2">Accessories</label>
-                <div className="flex flex-wrap gap-2">
-                  {accessoryOptions.map(acc => (
-                    <button
-                      key={acc.id}
-                      type="button"
-                      onClick={() => handleAccessoryToggle(acc.id)}
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        selectedAccessories.includes(acc.id)
-                          ? 'bg-green-500 text-white'
-                          : 'bg-gray-200 text-gray-700'
-                      }`}
-                    >
-                      {acc.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Description & Condition */}
-            <div className="bg-gray-50 p-4 rounded-lg space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Problem Description</label>
-                <textarea
-                  name="problemDescription"
-                  value={formData.problemDescription}
-                  onChange={handleChange}
-                  rows={3}
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Device Condition</label>
-                <textarea
-                  name="deviceCondition"
-                  value={formData.deviceCondition}
-                  onChange={handleChange}
-                  rows={3}
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Replace Submit Button with Next */}
-          <div className="col-span-2 flex justify-end gap-4 mt-6">
-            <button
-              type="button"
-              onClick={() => setActiveButton('transaction')}
-              className="px-4 py-2 border rounded-md hover:bg-gray-100"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-              className="px-4 py-2 bg-[#b9ec8f] text-black rounded-md hover:bg-[#a5d880]"
-            >
-              Next: Edit Images
-            </button>
-          </div>
-        </form>
-      ) : (
-        <DeviceImageEdit
-          formStep={formStep}
-          setFormStep={setFormStep}
-          transaction={transaction}
-          handleSubmit={handleSubmit}
-        />
-      )}
+      {renderComponent()}
     </div>
   );
 };

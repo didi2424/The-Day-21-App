@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { MdClose } from 'react-icons/md';
 import { FaTrash } from 'react-icons/fa';
 
-const DeviceImageEdit = ({ formStep, setFormStep, transaction, handleSubmit }) => {
+const DeviceImageEdit = ({ formStep, setFormStep, transaction, handleSubmit, setCurrentComponent }) => {
   const [mainImage, setMainImage] = useState(transaction.images?.main?.imageData || null);
   const [additionalImages, setAdditionalImages] = useState(
     transaction.images?.additional?.map(img => img.imageData) || []
@@ -80,6 +80,21 @@ const DeviceImageEdit = ({ formStep, setFormStep, transaction, handleSubmit }) =
     } catch (error) {
       console.error('Error updating images:', error);
       toast.error('Failed to update images');
+    }
+  };
+
+  const handleSaveImages = async () => {
+    try {
+      await handleSubmit({
+        images: {
+          main: { imageData: mainImageBase64 },
+          additional: additionalImagesBase64.map(preview => ({ imageData: preview }))
+        }
+      });
+      // Component will switch in the parent's handleImageSubmit
+    } catch (error) {
+      console.error('Error saving images:', error);
+      toast.error('Failed to save images');
     }
   };
 
@@ -191,10 +206,10 @@ const DeviceImageEdit = ({ formStep, setFormStep, transaction, handleSubmit }) =
           Back
         </button>
         <button
-          onClick={handleFinishUpdate}
+          onClick={handleSaveImages}
           className="px-4 py-2 bg-[#b9ec8f] text-black rounded-md hover:bg-[#a5d880]"
         >
-          Save Changes
+          Next: Add Hardware & Costs
         </button>
       </div>
     </div>
