@@ -1,12 +1,31 @@
 import { connectToDB } from "@utils/database";
 import Transaction from "@models/transaction";
 import TransactionImage from "@models/transactionImage";
+import mongoose from "mongoose";
 
 // Get specific transaction
-export const GET = async (req, { params }) => {
+export const GET = async (request, context) => {
   try {
     await connectToDB();
-    const id = await params.id; // Wait for params
+    
+    // Wait for params to be available
+    const params = await context.params;
+    if (!params || !params.id) {
+      return new Response(JSON.stringify({ error: "Missing transaction ID" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const id = params.id;
+
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return new Response(JSON.stringify({ error: "Invalid transaction ID format" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     
     // Get transaction with customer data
     const transaction = await Transaction.findById(id)
@@ -20,7 +39,7 @@ export const GET = async (req, { params }) => {
 
     // Get associated images
     const images = await TransactionImage.find({ 
-      transactionId: params.id 
+      transactionId: id 
     }).lean();
 
     // Format accessories data before sending
@@ -54,10 +73,20 @@ export const GET = async (req, { params }) => {
 };
 
 // Update transaction
-export const PATCH = async (request, { params }) => {
+export const PATCH = async (request, context) => {
   try {
     await connectToDB();
-    const id = await params.id;
+    
+    // Wait for params to be available
+    const params = await context.params;
+    if (!params || !params.id) {
+      return new Response(JSON.stringify({ error: "Missing transaction ID" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const id = params.id;
     const data = await request.json();
 
     // Format image data sebelum update
@@ -117,10 +146,28 @@ export const PATCH = async (request, { params }) => {
 };
 
 // Delete transaction
-export const DELETE = async (request, { params }) => {
+export const DELETE = async (request, context) => {
   try {
     await connectToDB();
-    const id = await params.id;
+    
+    // Wait for params to be available
+    const params = await context.params;
+    if (!params || !params.id) {
+      return new Response(JSON.stringify({ error: "Missing transaction ID" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const id = params.id;
+
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return new Response(JSON.stringify({ error: "Invalid transaction ID format" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
     // Find and delete the transaction
     const deletedTransaction = await Transaction.findByIdAndDelete(id);
