@@ -70,47 +70,42 @@ export const PATCH = async (request, context) => {
   }
 };
 
-export async function GET(request, context) {
+export async function GET(request) {
   try {
-    await connectToDB();
+    const { searchParams } = new URL(request.url);
+    const query = searchParams.get('q');
 
-    // Wait for params to be available
-    const params = await context.params;
-    if (!params || !params.id) {
-      return new Response(JSON.stringify({ error: "Missing inventory ID" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
+    if (query) {
+      // Handle search
+      const items = await prisma.inventory.findMany({
+        where: {
+          OR: [
+            {
+              name: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+            {
+              brand: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+          ],
+        },
+        take: 10,
       });
+      return NextResponse.json(items);
     }
 
-    const id = params.id;
-
-    // Validate ID format
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return new Response(JSON.stringify({ error: "Invalid inventory ID format" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    const item = await Inventory.findById(id);
-    
-    if (!item) {
-      return new Response(JSON.stringify({ error: "Item not found" }), { 
-        status: 404,
-        headers: { "Content-Type": "application/json" }
-      });
-    }
-
-    return new Response(JSON.stringify(item), { 
-      status: 200,
-      headers: { "Content-Type": "application/json" }
+    // Existing single item fetch logic
+    const id = request.url.split('/').pop();
+    const inventory = await prisma.inventory.findUnique({
+      where: { id },
     });
+    return NextResponse.json(inventory);
   } catch (error) {
-    console.error("Error fetching inventory item:", error);
-    return new Response(JSON.stringify({ error: "Failed to fetch item" }), { 
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
