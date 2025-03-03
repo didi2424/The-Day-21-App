@@ -1,3 +1,5 @@
+![Total Lines](https://img.shields.io/tokei/lines/github/didi2424/The-Day-21-App)
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
