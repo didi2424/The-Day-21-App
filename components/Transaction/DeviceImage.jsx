@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Image from 'next/image';
-import { MdFullscreen, MdFullscreenExit, MdClose, MdArrowBack } from 'react-icons/md';
+import { MdFullscreen, MdClose } from 'react-icons/md';
 
 const ImageWithFullscreen = ({ src, alt, openFullscreen }) => (
   <div className="relative h-32 rounded-lg overflow-hidden group">
@@ -69,7 +69,7 @@ const FullscreenModal = ({ imageUrl, onClose, onNext, onPrev, totalImages, curre
   </div>
 );
 
-const DeviceImage = ({ transaction, currentStep, setCurrentStep }) => {
+const DeviceImage = ({ transaction, setCurrentStep }) => {
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -116,6 +116,11 @@ const DeviceImage = ({ transaction, currentStep, setCurrentStep }) => {
     });
   };
 
+  const handleNextClick = () => {
+    console.log('Next button clicked, changing to step 3');
+    setCurrentStep(3);
+  };
+
   return (
     <div>
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
@@ -123,7 +128,6 @@ const DeviceImage = ({ transaction, currentStep, setCurrentStep }) => {
         
         <div className="flex gap-6">
           <div className="flex-[2] space-y-6">
-            {/* Main Image dengan ukuran yang lebih kecil */}
             {transaction.images?.main && (
               <div>
                 <h3 className="text-sm font-medium mb-2 text-gray-700">Main Image</h3>
@@ -144,7 +148,6 @@ const DeviceImage = ({ transaction, currentStep, setCurrentStep }) => {
               </div>
             )}
 
-            {/* Additional Images dengan ukuran yang lebih kecil */}
             {transaction.images?.additional?.length > 0 && (
               <div>
                 <h3 className="text-sm font-medium mb-2 text-gray-700">Additional Images</h3>
@@ -173,18 +176,22 @@ const DeviceImage = ({ transaction, currentStep, setCurrentStep }) => {
           </div>
         </div>
 
-        {/* Moved and restyled Back button */}
-        <div className="flex justify-end mt-4">
+        <div className="flex justify-end gap-4 mt-4">
           <button
             onClick={() => setCurrentStep(1)}
             className="px-4 py-2 bg-[#b9ec8f] text-black rounded-md hover:bg-[#a5d880]"
           >
             Back
           </button>
+          <button
+            onClick={handleNextClick}
+            className="px-4 py-2 bg-[#b9ec8f] text-black rounded-md hover:bg-[#a5d880]"
+          >
+            Next
+          </button>
         </div>
       </div>
 
-      {/* Fullscreen Modal */}
       {fullscreenImage && (
         <FullscreenModal
           imageUrl={fullscreenImage}

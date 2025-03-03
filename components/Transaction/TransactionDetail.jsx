@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { MdFullscreen, MdFullscreenExit, MdClose, MdDescription, MdInfo, MdDevices, MdSettings, MdArrowBack } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
 import DeviceImage from './DeviceImage';
+import TotalService from './TotalService';
 
 const TransactionDetail = ({ transactionId }) => {
   const router = useRouter();
@@ -172,6 +173,14 @@ const TransactionDetail = ({ transactionId }) => {
     />
   );
 
+  const renderStep3 = () => (
+    <TotalService
+      transaction={transaction}
+      currentStep={currentStep}
+      setCurrentStep={setCurrentStep}
+    />
+  );
+
   return (
     <div className=" bg-white">
       {/* Main Header - Made more compact */}
@@ -195,7 +204,9 @@ const TransactionDetail = ({ transactionId }) => {
       </div>
 
       {/* Conditional Content Based on Step */}
-      {currentStep === 1 ? renderStep1() : renderStep2()}
+      {currentStep === 1 ? renderStep1() : 
+       currentStep === 2 ? renderStep2() : 
+       renderStep3()}
     </div>
   );
 };
