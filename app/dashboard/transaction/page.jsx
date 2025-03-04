@@ -7,8 +7,8 @@ import { MdArrowBack } from "react-icons/md"; // Add this import
 import SidebarTransaction from '../../../components/Sidebar/SidebarTransaction';
 import TransactionAdd from '../../../components/Transaction/TransactionAdd';	
 import TransactionList from '../../../components/Transaction/TransactionList';
-import TransactionDetail from '../../../components/Transaction/TransactionDetail';
-import TransactionUpdate from '../../../components/Transaction/TransactionUpdate';
+import TransactionDetail from '../../../components/Transaction/TransactionDetail/TransactionDetail';
+import TransactionUpdate from '../../../components/Transaction/TransactionEdit/TransactionUpdate';
 
 const DashboardTransactionContent = ({ activeButton, selectedTransactionId, setActiveButton, setSelectedTransactionId }) => {
     const { data: session } = useSession();

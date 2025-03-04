@@ -1,6 +1,6 @@
 'use client';
 import { useParams, useRouter } from 'next/navigation';
-import TransactionDetail from '@/components/Transaction/TransactionDetail';
+import TransactionDetail from '@/components/TransactionDetail/TransactionDetail';
 import Provider from "@/components/Provider";
 import { MdArrowBack } from "react-icons/md";
 

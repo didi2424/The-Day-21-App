@@ -24,12 +24,21 @@ const HardwareTransactionSchema = new Schema({
       required: [true, 'Quantity is required'],
       min: [1, 'Quantity must be at least 1']
     },
+    discount: {
+      type: Number,
+      default: 0,
+      min: [0, 'Discount cannot be negative'],
+      max: [100, 'Discount cannot exceed 100%']
+    },
     warranty: {
-      type: String,
-      required: [true, 'Warranty period is required'],
-      enum: {
-        values: ['0', '3', '6', '12'],
-        message: 'Warranty must be 0, 3, 6, or 12 months'
+      type: Number,
+      required: true,
+      validate: {
+        validator: function(v) {
+          // Allow decimal for weeks (0.25) and whole numbers
+          return v === 0 || v === 0.25 || v === 1 || v === 3 || v === 6 || v === 12;
+        },
+        message: props => `${props.value} is not a valid warranty period`
       }
     },
     inventoryId: {
@@ -69,10 +78,12 @@ const HardwareTransactionSchema = new Schema({
 // Update pre-save middleware
 HardwareTransactionSchema.pre('save', async function(next) {
   try {
-    // Calculate total cost
-    let hardwareTotal = this.replacedHardware.reduce((sum, hw) => 
-      sum + (hw.price * hw.quantity), 0
-    );
+    // Calculate total cost with discounts
+    let hardwareTotal = this.replacedHardware.reduce((sum, hw) => {
+      const itemTotal = hw.price * hw.quantity;
+      const discountAmount = (itemTotal * (hw.discount || 0)) / 100;
+      return sum + (itemTotal - discountAmount);
+    }, 0);
 
     const { diagnosis, workmanship, other } = this.serviceCost;
     const serviceTotal = (diagnosis || 0) + (workmanship || 0) + (other || 0);

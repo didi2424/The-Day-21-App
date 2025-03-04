@@ -13,7 +13,7 @@ const TransactionUpdatePage2 = ({
 
   // State untuk hardware yang diganti
   const [replacedHardware, setReplacedHardware] = useState([
-    { id: Date.now(), name: "", manufacture: "", price: "", warranty: "3", quantity: 1 },
+    { id: Date.now(), name: "", manufacture: "", price: "", warranty: "3", quantity: 1, discount: 0 },
   ]);
 
   // State untuk biaya servis
@@ -25,17 +25,45 @@ const TransactionUpdatePage2 = ({
 
   // Opsi garansi
   const warrantyOptions = [
-    { value: "0", label: "No Warranty" },
-    { value: "3", label: "3 Months" },
-    { value: "6", label: "6 Months" },
-    { value: "12", label: "12 Months" },
+    { value: "0", label: "Tanpa Garansi" },
+    { value: "1w", label: "1 Minggu" },
+    { value: "1m", label: "1 Bulan" },
+    { value: "3m", label: "3 Bulan" },
+    { value: "6m", label: "6 Bulan" },
+    { value: "12m", label: "12 Bulan" },
   ];
+
+  // Add this function to convert warranty values
+  const convertWarrantyToMonths = (warranty) => {
+    switch (warranty) {
+      case '0': return 0;
+      case '1w': return 0.25; // approximately 1 week in months
+      case '1m': return 1;
+      case '3m': return 3;
+      case '6m': return 6;
+      case '12m': return 12;
+      default: return 0;
+    }
+  };
+
+  // Convert numeric warranty value to option value
+  const convertWarrantyToOption = (numericWarranty) => {
+    switch (numericWarranty) {
+      case 0: return "0";
+      case 0.25: return "1w";
+      case 1: return "1m";
+      case 3: return "3m";
+      case 6: return "6m";
+      case 12: return "12m";
+      default: return "0";
+    }
+  };
 
   // Tambah hardware baru
   const addHardware = () => {
     setReplacedHardware([
       ...replacedHardware,
-      { id: Date.now(), name: "", manufacture: "", price: "", warranty: "3", quantity: 1 },
+      { id: Date.now(), name: "", manufacture: "", price: "", warranty: "3", quantity: 1, discount: 0 },
     ]);
   };
 
@@ -64,10 +92,17 @@ const TransactionUpdatePage2 = ({
     }));
   };
 
+  // Calculate item total
+  const calculateItemTotal = (item) => {
+    const subtotal = (parseFloat(item.price) || 0) * (parseInt(item.quantity) || 1);
+    const discountAmount = subtotal * ((parseFloat(item.discount) || 0) / 100);
+    return subtotal - discountAmount;
+  };
+
   // Calculate total cost
   useEffect(() => {
     const hardwareTotal = replacedHardware.reduce(
-      (sum, hw) => sum + (parseFloat(hw.price) || 0) * (parseInt(hw.quantity) || 1),
+      (sum, hw) => sum + calculateItemTotal(hw),
       0
     );
 
@@ -94,9 +129,10 @@ const TransactionUpdatePage2 = ({
               name: hw.name,
               manufacture: hw.manufacture,
               price: hw.price.toString(),
-              warranty: hw.warranty,
+              warranty: convertWarrantyToOption(hw.warranty), // Convert numeric warranty to option
               quantity: hw.quantity,
-              inventoryId: hw.inventoryId
+              inventoryId: hw.inventoryId,
+              discount: hw.discount || 0
             })));
             setServiceCost({
               diagnosis: data.serviceCost.diagnosis.toString(),
@@ -125,7 +161,7 @@ const TransactionUpdatePage2 = ({
         toast.error('Please add at least one hardware item');
         return;
       }
-
+      console.log('Replaced hardware:', replacedHardware); // Debug log
       // Validate required fields
       const isValid = replacedHardware.every(hw => 
         hw.name && hw.manufacture && hw.price && hw.quantity && hw.inventoryId
@@ -143,8 +179,9 @@ const TransactionUpdatePage2 = ({
           manufacture: hw.manufacture,
           price: parseFloat(hw.price),
           quantity: parseInt(hw.quantity),
-          warranty: hw.warranty,
-          inventoryId: hw.inventoryId
+          warranty: convertWarrantyToMonths(hw.warranty), // Convert warranty here
+          inventoryId: hw.inventoryId,
+          discount: parseFloat(hw.discount) || 0
         })),
         serviceCost: {
           diagnosis: parseFloat(serviceCost.diagnosis) || 0,
@@ -232,9 +269,10 @@ const TransactionUpdatePage2 = ({
       name: item.name,
       manufacture: item.manufacture || '', // Changed from brand to manufacture
       price: item.price?.toString() || '',
-      warranty: '3',
+      warranty: "3m", // Set default warranty to 3 months
       quantity: 1,
-      inventoryId: item._id // Tambahkan inventoryId dari item yang dipilih
+      inventoryId: item._id, // Tambahkan inventoryId dari item yang dipilih
+      discount: 0
     };
     console.log('Selected item:', item); // Debug log
     console.log('New hardware:', newHardware); // Debug log
@@ -318,7 +356,7 @@ const TransactionUpdatePage2 = ({
             {replacedHardware.map((hw) => (
               <div
                 key={hw.id}
-                className="grid grid-cols-6 gap-4 items-center bg-white p-3 rounded-md"
+                className="grid grid-cols-8 gap-4 items-center bg-white p-3 rounded-md" // Changed from grid-cols-6 to grid-cols-8
               >
                 <div className="col-span-2">
                   <label className="block text-sm font-medium mb-1">
@@ -346,6 +384,38 @@ const TransactionUpdatePage2 = ({
                     } // Changed from 'brand' to 'manufacture'
                     className="w-full p-2 border rounded"
                     placeholder="Manufacture name"
+                  />
+                </div>
+                {/* Add Warranty Selection */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Warranty
+                  </label>
+                  <select
+                    value={hw.warranty}
+                    onChange={(e) => updateHardware(hw.id, "warranty", e.target.value)}
+                    className="w-full p-2 border rounded"
+                  >
+                    {warrantyOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {/* Add Discount field */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Discount (%)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={hw.discount || 0}
+                    onChange={(e) => updateHardware(hw.id, "discount", e.target.value)}
+                    className="w-full p-2 border rounded"
+                    placeholder="0"
                   />
                 </div>
                 <div>
@@ -377,8 +447,15 @@ const TransactionUpdatePage2 = ({
                 <div className="flex items-end gap-2">
                   <div className="flex-1">
                     <label className="block text-sm font-medium mb-1">Total</label>
-                    <div className="p-2 bg-gray-50 rounded text-right font-medium">
-                      Rp {((parseFloat(hw.price) || 0) * (parseInt(hw.quantity) || 1)).toLocaleString()}
+                    <div className="space-y-1">
+                      {hw.discount > 0 && (
+                        <div className="text-sm text-gray-500 line-through">
+                          Rp {((parseFloat(hw.price) || 0) * (parseInt(hw.quantity) || 1)).toLocaleString()}
+                        </div>
+                      )}
+                      <div className="p-2 bg-gray-50 rounded text-right font-medium">
+                        Rp {calculateItemTotal(hw).toLocaleString()}
+                      </div>
                     </div>
                   </div>
                   <button

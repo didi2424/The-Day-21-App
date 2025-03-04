@@ -221,6 +221,12 @@ const StockAdd = () => {
                 <option className="text-sm" value="Magnachip">
                   Magnachip
                 </option>
+                <option className="text-sm" value="Thermalright Odyssey">
+                  Thermalright Odyssey
+                </option>
+                <option className="text-sm" value="ARCTIC">
+                  ARCTIC
+                </option>
               </select>
             </div>
           </div>
