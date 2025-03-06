@@ -14,7 +14,7 @@ export default function TransactionDetailPage() {
 
   return (
     <Provider>
-      <div className="h-screen w-screen bg-gray-900 text-gray-100">
+      <div className="h-screen w-screen bg-[#efefef]  text-gray-100 ">
         {/* Keep this Back Button */}
         <div className="p-4">
           <button

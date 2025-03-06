@@ -101,7 +101,7 @@ function payments() {
 
     return (
         <Provider>
-            <div className="h-screen flex flex-col w-full">
+            <div className="h-screen flex flex-col w-full bg-[#efefef] ">
                 <header className="p-4">
                     <NavbarAdmin />
                 </header>

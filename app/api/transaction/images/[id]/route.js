@@ -29,11 +29,16 @@ export const PATCH = async (request, { params }) => {
     const id = await params.id;
     const { images } = await request.json();
 
+    console.log('Received images data:', {
+      hasMain: !!images.main?.imageData,
+      additionalCount: images.additional?.length || 0
+    });
+
     // Delete existing images
     await TransactionImage.deleteMany({ transactionId: id });
 
-    // Save main image
-    if (images.main?.imageData) {
+    // Save main image if it exists and has valid data
+    if (images.main?.imageData && images.main.imageData.trim() !== '') {
       await TransactionImage.create({
         transactionId: id,
         imageType: 'main',
@@ -41,21 +46,34 @@ export const PATCH = async (request, { params }) => {
       });
     }
 
-    // Save additional images
+    // Filter and save valid additional images
     if (images.additional?.length > 0) {
-      const additionalImagesData = images.additional.map(img => ({
-        transactionId: id,
-        imageType: 'additional',
-        imageData: img.imageData
-      }));
-      await TransactionImage.insertMany(additionalImagesData);
+      const validAdditionalImages = images.additional
+        .filter(img => img.imageData && img.imageData.trim() !== '')
+        .map(img => ({
+          transactionId: id,
+          imageType: 'additional',
+          imageData: img.imageData
+        }));
+
+      if (validAdditionalImages.length > 0) {
+        await TransactionImage.insertMany(validAdditionalImages);
+      }
     }
 
     const updatedImages = await TransactionImage.find({ transactionId: id });
+    console.log('Saved images count:', updatedImages.length);
     return new Response(JSON.stringify(updatedImages), { status: 200 });
 
   } catch (error) {
-    console.error('Image update error:', error);
-    return new Response(JSON.stringify({ message: error.message }), { status: 500 });
+    console.error('Image update error details:', {
+      message: error.message,
+      name: error.name,
+      errors: error.errors
+    });
+    return new Response(JSON.stringify({ 
+      message: error.message,
+      details: error.errors 
+    }), { status: 500 });
   }
 };

@@ -13,7 +13,7 @@ const RootLayout = ({ children }) => {
       
       <body>
       
-          <main className="app bg-[#f7f7f7] ">
+          <main className="app bg-[#efefef] ">
             {children}
           </main>
           <ToastContainer  />

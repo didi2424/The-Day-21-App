@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { MdFullscreen, MdClose } from 'react-icons/md';
+import DeviceImageHardwareReplacement from './DeviceImageHardwareReplacement';
 
 const ImageWithFullscreen = ({ src, alt, openFullscreen }) => (
   <div className="relative h-32 rounded-lg overflow-hidden group">
@@ -127,10 +128,11 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
         <h2 className="text-xl font-semibold mb-4 text-gray-900">Device Images</h2>
         
         <div className="flex gap-6">
-          <div className="flex-[2] space-y-6">
+          {/* Original Device Images Section */}
+          <div className="flex-1 space-y-6">
             {transaction.images?.main && (
               <div>
-                <h3 className="text-sm font-medium mb-2 text-gray-700">Main Image</h3>
+                <h4 className="text-sm font-medium mb-2 text-gray-700">Main Image</h4>
                 <div className="relative aspect-square w-[300px] rounded-lg overflow-hidden group">
                   <Image 
                     src={transaction.images.main.imageData}
@@ -150,7 +152,7 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
 
             {transaction.images?.additional?.length > 0 && (
               <div>
-                <h3 className="text-sm font-medium mb-2 text-gray-700">Additional Images</h3>
+                <h4 className="text-sm font-medium mb-2 text-gray-700">Additional Images</h4>
                 <div className="grid grid-cols-4 gap-4 w-[300px]">
                   {transaction.images.additional.map((img, index) => (
                     <div key={index} className="relative aspect-square">
@@ -173,6 +175,12 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Hardware Replacement Images Section */}
+          <div className="flex-1">
+            <h3 className="text-sm font-medium mb-2 text-gray-700">Hardware Replacement Images</h3>
+            <DeviceImageHardwareReplacement transactionId={transaction._id} />
           </div>
         </div>
 
