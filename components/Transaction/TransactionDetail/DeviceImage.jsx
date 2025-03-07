@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import Image from 'next/image';
 import { MdFullscreen, MdClose } from 'react-icons/md';
 import DeviceImageHardwareReplacement from './DeviceImageHardwareReplacement';
+import DeviceImagePrint from './DeviceImagePrint';
 
 const ImageWithFullscreen = ({ src, alt, openFullscreen }) => (
   <div className="relative h-32 rounded-lg overflow-hidden group">
@@ -73,6 +75,30 @@ const FullscreenModal = ({ imageUrl, onClose, onNext, onPrev, totalImages, curre
 const DeviceImage = ({ transaction, setCurrentStep }) => {
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [customerData, setCustomerData] = useState(null);
+  const [deviceData, setDeviceData] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch customer data
+        const customerResponse = await fetch(`/api/customers/${transaction.customerId}`);
+        const customerData = await customerResponse.json();
+        setCustomerData(customerData);
+
+        // Fetch device data
+        const deviceResponse = await fetch(`/api/devices/${transaction.deviceId}`);
+        const deviceData = await deviceResponse.json();
+        setDeviceData(deviceData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    if (transaction?.customerId && transaction?.deviceId) {
+      fetchData();
+    }
+  }, [transaction]);
 
   const getAllImages = (transaction) => {
     if (!transaction) return [];
@@ -120,6 +146,115 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
   const handleNextClick = () => {
     console.log('Next button clicked, changing to step 3');
     setCurrentStep(3);
+  };
+
+  const handlePrint = (transaction) => {
+    const printTab = window.open('', '_blank');
+    if (!printTab) {
+      alert('Please allow popups for this website');
+      return;
+    }
+
+    const printContent = document.getElementById('print-hardware')?.innerHTML;
+    if (!printContent) return;
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Hardware Images - ${transaction._id}</title>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+          <style>
+            body { 
+              margin: 0;
+              background: white;
+            }
+            .print-container {
+              width: 210mm;
+              min-height: 297mm;
+              margin: 0 auto;
+              background: white;
+              padding: 20mm;
+            }
+            .print-grid {
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              gap: 10mm;
+            }
+            .print-grid img {
+              max-width: 100%;
+              height: auto;
+              max-height: 100mm;
+              object-fit: contain;
+            }
+            @media print {
+              @page {
+                size: A4;
+                margin: 0;
+              }
+              body {
+                margin: 0;
+              }
+              .print-container {
+                width: 210mm;
+                min-height: 297mm;
+                padding: 20mm;
+                margin: 0;
+              }
+              #print-button {
+                display: none;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="print-container">
+            <button 
+              id="print-button"
+              onclick="window.print()"
+              style="margin-bottom: 20px; padding: 8px 16px; background: #b9ec8f; border: none; border-radius: 4px; cursor: pointer;"
+            >
+              Print Images
+            </button>
+            ${printContent}
+          </div>
+          <script>
+            window.onload = () => {
+              const images = document.getElementsByTagName('img');
+              let loadedImages = 0;
+              for(let img of images) {
+                if(img.complete) {
+                  loadedImages++;
+                } else {
+                  img.addEventListener('load', () => {
+                    loadedImages++;
+                    if(loadedImages === images.length) {
+                      // All images loaded
+                      document.fonts.ready.then(() => {
+                        // Fonts loaded too
+                        if(!window.chrome) window.print();
+                      });
+                    }
+                  });
+                }
+              }
+              if(loadedImages === images.length) {
+                document.fonts.ready.then(() => {
+                  if(!window.chrome) window.print();
+                });
+              }
+            };
+            window.onafterprint = () => window.close();
+          </script>
+        </body>
+      </html>
+    `;
+
+    printTab.document.open();
+    printTab.document.write(html);
+    printTab.document.close();
   };
 
   return (
@@ -175,6 +310,14 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
                 </div>
               </div>
             )}
+
+            {/* Print Button */}
+            <button
+              onClick={() => handlePrint(transaction)}
+              className="px-4 py-2 bg-[#b9ec8f] text-black rounded-md hover:bg-[#a5d880]"
+            >
+              Print Images
+            </button>
           </div>
 
           {/* Hardware Replacement Images Section */}
@@ -198,6 +341,17 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
             Next
           </button>
         </div>
+      </div>
+
+       {/* Hidden Print Template */}
+       <div id="print-hardware" className="hidden">
+        <DeviceImagePrint 
+          transaction={{
+            ...transaction,
+            customerData,
+            deviceData
+          }}
+        />
       </div>
 
       {fullscreenImage && (
