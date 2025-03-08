@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { format } from 'date-fns';
-import { MdFullscreen, MdFullscreenExit, MdClose, MdDescription, MdInfo, MdDevices, MdSettings, MdArrowBack } from 'react-icons/md';
-import { useRouter } from 'next/navigation';
+import { MdDescription, MdInfo,  MdSettings} from 'react-icons/md';
 import DeviceImage from './DeviceImage';
 import TotalService from './TotalService';
 
 const TransactionDetail = ({ transactionId }) => {
-  const router = useRouter();
   const [transaction, setTransaction] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(1); // Add this state
@@ -61,9 +58,9 @@ const TransactionDetail = ({ transactionId }) => {
   if (!transaction) return <div>Transaction not found</div>;
 
   const renderStep1 = () => (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 gap-4 ">
       {/* Customer Info Card */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+      <div className="p-4 rounded-lg shadow-sm border border-gray-100">
         <div className="flex items-center gap-2 mb-3">
           <MdInfo className="text-[#b9ec8f] text-xl" />
           <h2 className="text-lg font-semibold text-gray-900">Customer Information</h2>
@@ -86,7 +83,7 @@ const TransactionDetail = ({ transactionId }) => {
       </div>
 
       {/* Updated Service Info Card with Issues & Accessories */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+      <div className=" p-4 rounded-lg shadow-sm border border-gray-100">
         <div className="flex items-center gap-2 mb-3">
           <MdSettings className="text-[#b9ec8f] text-xl" />
           <h2 className="text-lg font-semibold text-gray-900">Service Details</h2>
@@ -138,7 +135,7 @@ const TransactionDetail = ({ transactionId }) => {
       </div>
 
       {/* Description Card - More compact */}
-      <div className="col-span-2 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+      <div className="col-span-2 p-4 rounded-lg shadow-sm border border-gray-100">
         <div className="flex items-center gap-2 mb-3">
           <MdDescription className="text-[#b9ec8f] text-xl" />
           <h2 className="text-lg font-semibold text-gray-900">Details & Condition</h2>
@@ -182,7 +179,7 @@ const TransactionDetail = ({ transactionId }) => {
   );
 
   return (
-    <div className=" bg-white">
+    <div className=" ">
       {/* Main Header - Made more compact */}
       <div className="bg-gray-50 p-4 rounded-lg mb-4 shadow-sm">
         <div className="flex justify-between items-start">
@@ -201,6 +198,7 @@ const TransactionDetail = ({ transactionId }) => {
             {transaction.status.toUpperCase()}
           </div>
         </div>
+        
       </div>
 
       {/* Conditional Content Based on Step */}

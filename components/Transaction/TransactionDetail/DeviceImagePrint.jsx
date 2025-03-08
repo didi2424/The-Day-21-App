@@ -46,8 +46,8 @@ const DeviceImagePrint = ({ transaction }) => {
                 </div>
                
                 <div>
-                  <p className="text-sm font-semibold">Serial Number</p>
-                  <p className="font-mono text-xs">{transaction.deviceData?.serialNumber || 'N/A'}</p>
+                  <p className="text-sm font-semibold">Problem Description</p>
+                  <p className="text-sm">{transaction.problemDescription || 'N/A'}</p>
                 </div>
                 <div>
                   <p className="text-sm font-semibold">Transaction ID</p>
@@ -69,8 +69,8 @@ const DeviceImagePrint = ({ transaction }) => {
             </div>
           </div>
           <div className="text-right">
-            <h2 className="text-xl font-bold text-gray-800">The Day 21</h2>
-            <p className="text-sm text-gray-600">Service & Repair</p>
+            <h2 className="text-xl font-bold text-gray-800">The Day 21 Group</h2>
+            <p className="text-sm text-gray-600">Service | Repair | Cleaning VGA/GPU 🖥️</p>
           </div>
         </div>
       </div>
@@ -102,8 +102,8 @@ const DeviceImagePrint = ({ transaction }) => {
             <p>Generated: {new Date().toLocaleString()}</p>
           </div>
           <div className="text-right">
-            <p className="font-medium">A4 Format Document</p>
-            <p>© {new Date().getFullYear()} The Day 21</p>
+            <p className="font-medium">Supercharging Happiness for Gamers & Creators</p>
+            <p>© {new Date().getFullYear()} The Day 21 Group</p>
           </div>
         </div>
       </div>

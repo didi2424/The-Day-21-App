@@ -4,11 +4,96 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { IoClose } from 'react-icons/io5';
 import { MdNavigateNext, MdNavigateBefore } from 'react-icons/md';
+import DeviceImageHardwareReplacementPrint from './DeviceImageHardwareReplacementPrint';
 
 const DeviceImageHardwareReplacement = ({ transactionId }) => {
   const [images, setImages] = useState([]);
+  const [transaction, setTransaction] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchTransactionDetail = async () => {
+      try {
+        const response = await fetch(`/api/transaction/${transactionId}`);
+        const data = await response.json();
+        setTransaction(data);
+      } catch (error) {
+        console.error('Error fetching transaction:', error);
+      } finally {
+       console.log('Fetched transaction:', transaction); // Debug log
+      }
+    };
+
+    if (transactionId) {
+      fetchTransactionDetail();
+    }
+  }, [transactionId]);
+
+  const handlePrint = () => {
+    const printTab = window.open('', '_blank');
+    if (!printTab) {
+      alert('Please allow popups for this website');
+      return;
+    }
+
+    const printContent = document.getElementById('print-hardwarereplacement')?.innerHTML;
+    if (!printContent) return;
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Hardware Images - ${transactionId}</title>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+          <style>
+            @page { size: A4; margin: 0; }
+            body { margin: 0; background: white; }
+            .print-container {
+              width: 210mm;
+              min-height: 297mm;
+              margin: 0 auto;
+              background: white;
+              padding: 20mm;
+              box-sizing: border-box;
+            }
+            img { 
+              max-width: 100%;
+              height: auto;
+            }
+            @media print {
+              body { margin: 0; }
+              #print-button { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="print-container">
+            <button 
+              id="print-button"
+              onclick="window.print()"
+              style="margin-bottom: 20px; padding: 8px 16px; background: #b9ec8f; border: none; border-radius: 4px; cursor: pointer;"
+            >
+              Print Images
+            </button>
+            ${printContent}
+          </div>
+          <script>
+            window.onafterprint = () => window.close();
+            window.onload = () => {
+              if(!window.chrome) setTimeout(() => window.print(), 1000);
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printTab.document.open();
+    printTab.document.write(html);
+    printTab.document.close();
+  };
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -111,6 +196,22 @@ const DeviceImageHardwareReplacement = ({ transactionId }) => {
             </div>
           )}
         </div>
+        <button
+          onClick={handlePrint}
+          className="mt-4 px-4 py-2 bg-[#b9ec8f] text-black rounded-md hover:bg-[#a5d880]"
+        >
+          Print Images
+        </button>
+      </div>
+
+      <div id="print-hardwarereplacement" className="hidden">
+        <DeviceImageHardwareReplacementPrint 
+          images={images}
+          transaction={transaction || {
+            _id: transactionId,
+            images: { additional: images }
+          }}
+        />
       </div>
 
       {/* Enhanced Modal */}
@@ -168,7 +269,9 @@ const DeviceImageHardwareReplacement = ({ transactionId }) => {
               {selectedImageIndex + 1} / {images.length}
             </div>
           </div>
+         
         </div>
+        
       )}
     </>
   );

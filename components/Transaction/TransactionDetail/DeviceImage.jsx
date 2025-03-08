@@ -5,25 +5,6 @@ import { MdFullscreen, MdClose } from 'react-icons/md';
 import DeviceImageHardwareReplacement from './DeviceImageHardwareReplacement';
 import DeviceImagePrint from './DeviceImagePrint';
 
-const ImageWithFullscreen = ({ src, alt, openFullscreen }) => (
-  <div className="relative h-32 rounded-lg overflow-hidden group">
-    <div className="w-full h-full">
-      <Image
-        src={src}
-        alt={alt}
-        width={200}
-        height={200}
-        className="rounded-lg transition-transform group-hover:scale-105 object-cover w-full h-full"
-      />
-    </div>
-    <button
-      onClick={() => openFullscreen(src)}
-      className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
-    >
-      <MdFullscreen size={20} />
-    </button>
-  </div>
-);
 
 const FullscreenModal = ({ imageUrl, onClose, onNext, onPrev, totalImages, currentIndex }) => (
   <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
@@ -268,7 +249,7 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
             {transaction.images?.main && (
               <div>
                 <h4 className="text-sm font-medium mb-2 text-gray-700">Main Image</h4>
-                <div className="relative aspect-square w-[300px] rounded-lg overflow-hidden group">
+                <div className="relative aspect-square w-[250px] rounded-lg overflow-hidden group">
                   <Image 
                     src={transaction.images.main.imageData}
                     alt="Main device"
@@ -288,7 +269,7 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
             {transaction.images?.additional?.length > 0 && (
               <div>
                 <h4 className="text-sm font-medium mb-2 text-gray-700">Additional Images</h4>
-                <div className="grid grid-cols-4 gap-4 w-[300px]">
+                <div className="grid grid-cols-4 gap-4 w-[400px]">
                   {transaction.images.additional.map((img, index) => (
                     <div key={index} className="relative aspect-square">
                       <div className="w-full h-full rounded-lg overflow-hidden group">

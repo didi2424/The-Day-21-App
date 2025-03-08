@@ -1,6 +1,5 @@
 import React from 'react';
-import { IoIosSettings } from "react-icons/io";
-import { TbHelpSquareRoundedFilled, TbReportSearch } from "react-icons/tb";
+import { TbReportSearch } from "react-icons/tb";
 import { MdOutbox, MdGridView, MdPersonAdd } from "react-icons/md";
 
 const SidebarConstumers = ({ activeButton, setActiveButton }) => {
@@ -50,23 +49,7 @@ const SidebarConstumers = ({ activeButton, setActiveButton }) => {
             {/* Bottom spacing */}
             <div className="flex-1"></div>
 
-            {/* Settings Menu at the Bottom */}
-            <div className="space-y-2">
-                <a
-                    onClick={() => setActiveButton('Help Center')}
-                    className={`${activeButton === 'Help Center' ? 'active' : ''} sidebar_btnnew`}
-                >
-                    <TbHelpSquareRoundedFilled className="mr-2" />
-                    Help Center
-                </a>
-                <a
-                    onClick={() => setActiveButton('Settings')}
-                    className={`${activeButton === 'Settings' ? 'active' : ''} sidebar_btnnew`}
-                >
-                    <IoIosSettings className="mr-2" />
-                    Settings
-                </a>
-            </div>
+          
         </aside>
     );
 };
