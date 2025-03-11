@@ -196,157 +196,188 @@ const CustomerList = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        {/* Customer List Title */}
-        <h2 className="text-2xl font-bold">Customer List</h2>
-
-        {/* Updated Search Bar */}
-        <div className="relative w-full max-w-md">
-          <input
-            type="text"
-            placeholder="Search by name, phone, or address..."
-            value={searchTerm}
-            onChange={handleSearch}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
-          />
-          {searchTerm && (
-            <button
-              onClick={handleClearSearch}
-              className="absolute right-10 top-1/2 transform -translate-y-1/2 hover:bg-gray-100 p-1 rounded-full"
-            >
-              <MdClose className="text-gray-500 text-xl hover:text-gray-700" />
-            </button>
-          )}
-          {isSearching ? (
-            <MdOutlineTimelapse className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
-          ) : (
-            <MdPersonSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
-          )}
-        </div>
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-800/20 to-pink-900/20" />
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-500/20 rounded-full mix-blend-multiply filter blur-[128px]"></div>
+        <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-purple-500/20 rounded-full mix-blend-multiply filter blur-[128px]"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-[700px] h-[700px] bg-pink-500/20 rounded-full mix-blend-multiply filter blur-[128px]"></div>
       </div>
-
-      <p>Total customers: {totalCustomers}</p>
-
-      <ul>
-        {customers.length === 0 ? (
-          <p>No customers found.</p>
-        ) : (
-          customers.map((customer) => (
-            <li key={customer._id}>
-              <div className="flex flex-col pl-3 sm:flex-row rounded-lg shadow-sm h-31 pt-3 pb-3 mt-3">
-                {/* Profile Section */}
-                <div className="flex-1 flex gap-4 items-center">
-                  <div className="cursor-pointer">
-                    {/* Add your profile image or icon here */}
-                  </div>
-                  <div className="flex flex-col">
-                    <h3 className="font-satoshi font-semibold text-gray-900">
-                      {customer.constumer_name}
-                    </h3>
-                    <p className="font-inter text-sm text-gray-500">
-                      {customer.wa_number}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Task Section */}
-                <div
-                  className="flex-1 relative"
-                  onClick={() => toggleTooltip(customer._id)}
+      <div className=" mx-auto p-4">
+        {/* Header Section */}
+        <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl border border-gray-700/50 p-6 mb-6 shadow-lg">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+              Customer List
+            </h2>
+            <div className="relative w-full md:w-96">
+              <input
+                type="text"
+                placeholder="Search by name, phone, or address..."
+                value={searchTerm}
+                onChange={handleSearch}
+                className="w-full px-4 py-2.5 rounded-lg bg-gray-800/50 border border-gray-700 text-gray-100 
+                  focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 
+                  focus:outline-none backdrop-blur-xl"
+              />
+              {searchTerm && (
+                <button
+                  onClick={handleClearSearch}
+                  className="absolute right-10 top-1/2 transform -translate-y-1/2 hover:bg-gray-100 p-1 rounded-full"
                 >
-                  <div className="font-satoshi text-sm text-gray-700">
-                    {customer.constumer_address.street}
-                  </div>
-                  <p className="font-inter text-sm text-gray-500">
-                    {customer.constumer_address.kabupaten}
-                  </p>
+                  <MdClose className="text-gray-500 text-xl hover:text-gray-700" />
+                </button>
+              )}
+              {isSearching ? (
+                <MdOutlineTimelapse className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+              ) : (
+                <MdPersonSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+              )}
+            </div>
+          </div>
+        </div>
 
-                  {/* Tooltip for the specific customer */}
-                  {activeTooltipId === customer._id && (
-                    <div className="absolute left-0 top-0 transform -translate-x-full -translate-y-8 bg-gray-800 text-white text-xs rounded p-2 opacity-100 transition-opacity">
-                      {customer.constumer_address.street},{" "}
-                      {customer.constumer_address.city},{" "}
-                      {customer.constumer_address.kecamatan},{" "}
-                      {customer.constumer_address.kabupaten},{" "}
-                      {customer.constumer_address.province},{" "}
-                      {customer.constumer_address.postal_code}
+        {/* Customer List */}
+        <div className="bg-gray-800/30 backdrop-blur-xl rounded-xl border border-gray-700/50 overflow-hidden">
+          <ul className="divide-y divide-gray-700/50">
+            {customers.length === 0 ? (
+              <p className="text-center py-4 text-gray-400">
+                No customers found.
+              </p>
+            ) : (
+              customers.map((customer) => (
+                <li
+                  key={customer._id}
+                  className="group hover:bg-gray-800/50 transition-all duration-300 relative overflow-hidden"
+                >
+                  {/* Glow effect on hover */}
+                  <div
+                    className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 
+                    group-hover:opacity-100 transition-opacity duration-300"
+                  />
+
+                  <div className="relative flex items-center px-4 py-4 gap-4">
+                    {/* Profile Section */}
+                    <div className="flex-1 flex gap-4 items-center">
+                      <div className="cursor-pointer">
+                        {/* Add your profile image or icon here */}
+                      </div>
+                      <div className="flex flex-col">
+                        <h3 className="font-satoshi font-semibold text-gray-300">
+                          {customer.constumer_name}
+                        </h3>
+                        <p className="font-inter text-sm text-gray-500">
+                          {customer.wa_number}
+                        </p>
+                      </div>
                     </div>
-                  )}
-                </div>
 
-                {/* Date Section */}
-                <div className="flex-1 flex justify-center flex-col">
-                  <p className="font-satoshi text-xs text-gray-300">
-                    Created At:{" "}
-                    {format(new Date(customer.createdAt), "MM/dd HH:mm")}
-                  </p>
-                  <p className="font-satoshi text-xs text-gray-300">
-                    Updated At:{" "}
-                    {format(new Date(customer.updatedAt), "MM/dd HH:mm")}
-                  </p>
-                </div>
+                    {/* Task Section */}
+                    <div
+                      className="flex-1 relative"
+                      onClick={() => toggleTooltip(customer._id)}
+                    >
+                      <div className="font-satoshi text-sm text-gray-300">
+                        {customer.constumer_address.street}
+                      </div>
+                      <p className="font-inter text-sm text-gray-500">
+                        {customer.constumer_address.kabupaten}
+                      </p>
 
-                <div className="flex-1 flex justify-center flex-col">
-                  <p className="font-satoshi text-xs text-gray-300">Status</p>
-                  <p
-                    className={`font-satoshi text-xs ${
-                      customer.status?.toLowerCase() === "active"
-                        ? "text-green-500"
-                        : "text-orange-500"
-                    }`}
-                  >
-                    {customer.status}
-                  </p>
-                </div>
+                      {/* Tooltip for the specific customer */}
+                      {activeTooltipId === customer._id && (
+                        <div className="absolute left-0 top-0 transform -translate-x-full -translate-y-8 bg-gray-800 text-white text-xs rounded p-2 opacity-100 transition-opacity">
+                          {customer.constumer_address.street},{" "}
+                          {customer.constumer_address.city},{" "}
+                          {customer.constumer_address.kecamatan},{" "}
+                          {customer.constumer_address.kabupaten},{" "}
+                          {customer.constumer_address.province},{" "}
+                          {customer.constumer_address.postal_code}
+                        </div>
+                      )}
+                    </div>
 
-                {/* Action Button Section */}
-                <div className="flex-1 flex gap-10 items-center">
-                  <p
-                    className="font-inter text-sm cursor-pointer"
-                    onClick={() => handleEdit(customer)}
-                  >
-                    Edit
-                  </p>
-                  <p
-                    className="font-inter text-sm cursor-pointer border rounded-md pl-2 pr-2 pt-1 pb-1 bg-red-600 text-white "
-                    onClick={() => handleDelete(customer)}
-                  >
-                    Delete
-                  </p>
-                </div>
-              </div>
-            </li>
-          ))
-        )}
-      </ul>
+                    {/* Date Section */}
+                    <div className="flex-1 flex justify-center flex-col">
+                      <p className="font-satoshi text-xs text-gray-300">
+                        Created At:{" "}
+                        {format(new Date(customer.createdAt), "MM/dd HH:mm")}
+                      </p>
+                      <p className="font-satoshi text-xs text-gray-300">
+                        Updated At:{" "}
+                        {format(new Date(customer.updatedAt), "MM/dd HH:mm")}
+                      </p>
+                    </div>
 
-      <div className="flex justify-between mt-4">
-        <p className="mt-2 text-sm">
-          Page {currentPage} of {totalPages}
-        </p>
-        <div className="gap-4 flex">
-          <button
-            onClick={handleBack}
-            disabled={currentPage === 1}
-            className={`next_btn ${
-              currentPage === 1
-                ? "cursor-not-allowed opacity-50"
-                : "hover:bg-[b9ec8f]"
-            }`}
-          >
-            Back
-          </button>
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className={`next_btn ${
-              currentPage === totalPages
-                ? "cursor-not-allowed opacity-50"
-                : "hover:bg-[b9ec8f]"
-            }`}
-          >
-            Next
-          </button>
+                    <div className="flex-1 flex justify-center flex-col">
+                      <p className="font-satoshi text-xs text-gray-300">Status</p>
+                      <p
+                        className={`font-satoshi text-xs ${
+                          customer.status?.toLowerCase() === "active"
+                            ? "text-green-500"
+                            : "text-orange-500"
+                        }`}
+                      >
+                        {customer.status}
+                      </p>
+                    </div>
+
+                    {/* Action Button Section */}
+                    <div className="w-32 flex justify-end gap-2">
+                      <button
+                        onClick={() => handleEdit(customer)}
+                        className="px-3 py-1.5 text-xs font-medium text-purple-300 bg-purple-500/10 
+                          rounded border border-purple-500/50 hover:bg-purple-500/20 transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(customer)}
+                        className="p-1.5 text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                      >
+                        <MdClose className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+
+        {/* Pagination */}
+        <div
+          className="mt-6 flex items-center justify-between bg-gray-800/50 backdrop-blur-xl 
+          rounded-xl border border-gray-700/50 p-4"
+        >
+          <p className="text-sm text-gray-400">
+            Page {currentPage} of {totalPages}
+          </p>
+          <div className="flex gap-3">
+            <button
+              onClick={handleBack}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors
+                ${
+                  currentPage === 1
+                    ? "bg-gray-800/50 text-gray-600 cursor-not-allowed"
+                    : "bg-blue-500/10 text-blue-300 hover:bg-blue-500/20 border border-blue-500/50"
+                }`}
+            >
+              Previous
+            </button>
+            <button
+              onClick={handleNext}
+              disabled={currentPage === totalPages}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors
+                ${
+                  currentPage === totalPages
+                    ? "bg-gray-800/50 text-gray-600 cursor-not-allowed"
+                    : "bg-blue-500/10 text-blue-300 hover:bg-blue-500/20 border border-blue-500/50"
+                }`}
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
 

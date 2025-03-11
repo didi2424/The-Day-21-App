@@ -5,12 +5,12 @@ import Provider from "@components/Provider";
 import { useSession } from "next-auth/react";
 import SidebarInventory from "../../../components/Sidebar/SidebarInventory";
 import InventoryCard from "../../../components/Inventory/CardInventory/InventoryCard"; // Adjust path if necessary
-import StockList from "../../../components/Inventory/StockList"
+import StockList from "../../../components/Inventory/StockList";
 import StockAdd from "../../../components/Inventory/StockAdd";
 
 import SvgIcon from "../../../components/Inventory/Drawyer/Drawyer5x5";
 
-import {MdArrowBack } from "react-icons/md";
+import { MdArrowBack } from "react-icons/md";
 
 const DashboardInvetoryContent = ({ activeButton, setActiveButton }) => {
   const { data: session } = useSession();
@@ -63,7 +63,7 @@ const DashboardInvetoryContent = ({ activeButton, setActiveButton }) => {
         <div>
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center gap-2 text-cyan-500  mb-4"
           >
             <MdArrowBack size={20} />
             <span>Back to Dashboard</span>
@@ -76,7 +76,7 @@ const DashboardInvetoryContent = ({ activeButton, setActiveButton }) => {
         <div>
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center gap-2 text-cyan-500  mb-4"
           >
             <MdArrowBack size={20} />
             <span>Back to Dashboard</span>
@@ -113,7 +113,7 @@ const DashboardInvetoryContent = ({ activeButton, setActiveButton }) => {
         <Provider>
           {session?.user ? (
             <>
-              <div className="flex  bg-[#f7f7f7] rounded-md gap-4">
+              <div className="flex   rounded-md gap-4 ">
                 <div className="flex-1 gap-2">
                   <h1 className="text-3xl font-bold">Inventory Assets</h1>
 
@@ -125,8 +125,8 @@ const DashboardInvetoryContent = ({ activeButton, setActiveButton }) => {
                 </div>
 
                 {/* Right side: Other Content */}
-                <div className="w-1/3 bg-[#feffff] p-4 rounded-md">
-                  <h2 className="text-xl text-black">AI assistance</h2>
+                <div className="w-1/3  p-4 rounded-md">
+                  <h2 className="text-xl text-white">AI assistance</h2>
                 </div>
               </div>
 
@@ -177,9 +177,6 @@ const DashboardInvetoryContent = ({ activeButton, setActiveButton }) => {
                           6
                         </div>
                       </div>
-
-
-
                     </div>
                   </div>
                 </div>
@@ -201,9 +198,9 @@ function inventory() {
   // Handle query parameter on component mount
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const view = searchParams.get('view');
-    if (view === 'stock') {
-      setActiveButton('stock');
+    const view = searchParams.get("view");
+    if (view === "stock") {
+      setActiveButton("stock");
     }
   }, []);
 
@@ -217,13 +214,13 @@ function inventory() {
 
   return (
     <Provider>
-      <div className="h-screen flex flex-col w-full">
+      <div className="h-screen flex flex-col w-full bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 ">
         {/* Navbar */}
-        <header className="p-4">
+        <header className="p-4 bg-black/30 backdrop-blur-lg border-b border-purple-500/20">
           <NavbarAdmin />
         </header>
-        <div className="justify-between flex pr-4 pl-4">
-          <div className="text-sm">{getBreadcrumb()}</div>
+        <div className="justify-between flex pr-4 pl-4 py-2 text-cyan-400">
+          <div className="text-sm text-cyan-400">{getBreadcrumb()}</div>
 
           <div></div>
         </div>
@@ -236,8 +233,9 @@ function inventory() {
           />
 
           {/* Main Content Section */}
-          <div className="flex-1 p-5 overflow-auto rounded-[20px] border border-gray-500 m-3 bg-[#fefdfb]">
-            <DashboardInvetoryContent 
+          <div className="flex-1 p-5 overflow-auto rounded-[20px] border border-purple-500/30 m-3 bg-slate-900/70 backdrop-blur-xl shadow-lg shadow-purple-500/10 text-white">
+
+            <DashboardInvetoryContent
               activeButton={activeButton}
               setActiveButton={setActiveButton}
             />

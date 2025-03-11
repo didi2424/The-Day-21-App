@@ -1,15 +1,21 @@
-import { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
-import Image from 'next/image';
-import { MdFullscreen, MdClose } from 'react-icons/md';
-import DeviceImageHardwareReplacement from './DeviceImageHardwareReplacement';
-import DeviceImagePrint from './DeviceImagePrint';
+import { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
+import Image from "next/image";
+import { MdFullscreen, MdClose } from "react-icons/md";
+import DeviceImageHardwareReplacement from "./DeviceImageHardwareReplacement";
+import DeviceImagePrint from "./DeviceImagePrint";
 
-
-const FullscreenModal = ({ imageUrl, onClose, onNext, onPrev, totalImages, currentIndex }) => (
-  <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
-    <div className="relative w-full h-full">
-      <div className="absolute top-4 right-4 z-10 flex gap-2">
+const FullscreenModal = ({
+  imageUrl,
+  onClose,
+  onNext,
+  onPrev,
+  totalImages,
+  currentIndex,
+}) => (
+  <div className="fixed inset-0 w-screen h-screen bg-black/90 z-[9999] flex items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 w-full h-full">
+      <div className="absolute top-4 right-4 z-[9999] flex gap-2">
         <button
           onClick={onClose}
           className="p-2 bg-black/50 rounded-full text-white hover:bg-black/75"
@@ -20,30 +26,30 @@ const FullscreenModal = ({ imageUrl, onClose, onNext, onPrev, totalImages, curre
 
       <button
         onClick={onPrev}
-        className="absolute left-8 top-1/2 -translate-y-1/2 p-3 bg-black/50 rounded-full text-white hover:bg-black/75 z-20"
+        className="absolute left-8 top-1/2 -translate-y-1/2 p-3 bg-black/50 rounded-full text-white hover:bg-black/75 z-[9999]"
       >
         <span className="text-2xl">←</span>
       </button>
-      
+
       <button
         onClick={onNext}
-        className="absolute right-8 top-1/2 -translate-y-1/2 p-3 bg-black/50 rounded-full text-white hover:bg-black/75 z-20"
+        className="absolute right-8 top-1/2 -translate-y-1/2 p-3 bg-black/50 rounded-full text-white hover:bg-black/75 z-[9999]"
       >
         <span className="text-2xl">→</span>
       </button>
 
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white bg-black/50 px-4 py-2 rounded-full z-20">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white bg-black/50 px-4 py-2 rounded-full z-[9999]">
         {currentIndex + 1} / {totalImages}
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center p-12">
-        <div className="relative w-auto h-auto max-w-[85vw] max-h-[85vh]">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative w-screen h-screen flex items-center justify-center p-8">
           <Image
             src={imageUrl}
             alt="Fullscreen view"
             width={1920}
             height={1080}
-            className="object-contain w-auto h-auto max-w-full max-h-full"
+            className="object-contain max-w-full max-h-full w-auto h-auto"
             quality={100}
             priority
           />
@@ -63,16 +69,20 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
     const fetchData = async () => {
       try {
         // Fetch customer data
-        const customerResponse = await fetch(`/api/customers/${transaction.customerId}`);
+        const customerResponse = await fetch(
+          `/api/customers/${transaction.customerId}`
+        );
         const customerData = await customerResponse.json();
         setCustomerData(customerData);
 
         // Fetch device data
-        const deviceResponse = await fetch(`/api/devices/${transaction.deviceId}`);
+        const deviceResponse = await fetch(
+          `/api/devices/${transaction.deviceId}`
+        );
         const deviceData = await deviceResponse.json();
         setDeviceData(deviceData);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       }
     };
 
@@ -88,7 +98,7 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
       images.push(transaction.images.main.imageData);
     }
     if (transaction.images?.additional) {
-      images.push(...transaction.images.additional.map(img => img.imageData));
+      images.push(...transaction.images.additional.map((img) => img.imageData));
     }
     return images;
   };
@@ -98,12 +108,12 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
     const index = allImages.indexOf(imageUrl);
     setCurrentImageIndex(index);
     setFullscreenImage(imageUrl);
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
   };
 
   const closeFullscreen = () => {
     setFullscreenImage(null);
-    document.body.style.overflow = 'auto';
+    document.body.style.overflow = "auto";
   };
 
   const handlePrevImage = () => {
@@ -125,18 +135,18 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
   };
 
   const handleNextClick = () => {
-    console.log('Next button clicked, changing to step 3');
+    console.log("Next button clicked, changing to step 3");
     setCurrentStep(3);
   };
 
   const handlePrint = (transaction) => {
-    const printTab = window.open('', '_blank');
+    const printTab = window.open("", "_blank");
     if (!printTab) {
-      alert('Please allow popups for this website');
+      alert("Please allow popups for this website");
       return;
     }
 
-    const printContent = document.getElementById('print-hardware')?.innerHTML;
+    const printContent = document.getElementById("print-hardware")?.innerHTML;
     if (!printContent) return;
 
     const html = `
@@ -239,25 +249,27 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
   };
 
   return (
-    <div>
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-        <h2 className="text-xl font-semibold mb-4 text-gray-900">Device Images</h2>
-        
-        <div className="flex gap-6">
+    <div className="h-[540px]">
+      <div className=" p-6 rounded-lg  ">
+        <div className="flex gap-6 ">
           {/* Original Device Images Section */}
           <div className="flex-1 space-y-6">
             {transaction.images?.main && (
-              <div>
-                <h4 className="text-sm font-medium mb-2 text-gray-700">Main Image</h4>
+              <div className="">
+                <h4 className="text-sm font-medium mb-2 text-white">
+                  Main Image
+                </h4>
                 <div className="relative aspect-square w-[250px] rounded-lg overflow-hidden group">
-                  <Image 
+                  <Image
                     src={transaction.images.main.imageData}
                     alt="Main device"
                     fill
                     className="rounded-lg transition-transform group-hover:scale-105 object-cover"
                   />
                   <button
-                    onClick={() => openFullscreen(transaction.images.main.imageData)}
+                    onClick={() =>
+                      openFullscreen(transaction.images.main.imageData)
+                    }
                     className="absolute top-2 right-2 p-2 bg-black/50 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <MdFullscreen size={24} />
@@ -268,8 +280,10 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
 
             {transaction.images?.additional?.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium mb-2 text-gray-700">Additional Images</h4>
-                <div className="grid grid-cols-4 gap-4 w-[400px]">
+                <h4 className="text-sm font-medium mb-2 text-white">
+                  Additional Images
+                </h4>
+                <div className="grid grid-cols-4 gap-4 w-[300px]">
                   {transaction.images.additional.map((img, index) => (
                     <div key={index} className="relative aspect-square">
                       <div className="w-full h-full rounded-lg overflow-hidden group">
@@ -291,46 +305,36 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
                 </div>
               </div>
             )}
-
-            {/* Print Button */}
-            <button
-              onClick={() => handlePrint(transaction)}
-              className="px-4 py-2 bg-[#b9ec8f] text-black rounded-md hover:bg-[#a5d880]"
-            >
-              Print Images
-            </button>
+       
+          <button
+            onClick={() => handlePrint(transaction)}
+            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl
+                         hover:opacity-90 transition-all duration-300 shadow-lg"
+          >
+            Print Device
+          </button>
           </div>
 
           {/* Hardware Replacement Images Section */}
-          <div className="flex-1">
-            <h3 className="text-sm font-medium mb-2 text-gray-700">Hardware Replacement Images</h3>
-            <DeviceImageHardwareReplacement transactionId={transaction._id} />
+          <div className="flex-1 h-[460px] flex flex-col">
+            <h3 className="text-sm font-medium mb-2 text-white">
+              Hardware Replacement Images
+            </h3>
+            <div className="flex-grow">
+              <DeviceImageHardwareReplacement transactionId={transaction._id} />
+            </div>
           </div>
         </div>
-
-        <div className="flex justify-end gap-4 mt-4">
-          <button
-            onClick={() => setCurrentStep(1)}
-            className="px-4 py-2 bg-[#b9ec8f] text-black rounded-md hover:bg-[#a5d880]"
-          >
-            Back
-          </button>
-          <button
-            onClick={handleNextClick}
-            className="px-4 py-2 bg-[#b9ec8f] text-black rounded-md hover:bg-[#a5d880]"
-          >
-            Next
-          </button>
-        </div>
+   
       </div>
 
-       {/* Hidden Print Template */}
-       <div id="print-hardware" className="hidden">
-        <DeviceImagePrint 
+      {/* Hidden Print Template */}
+      <div id="print-hardware" className="hidden">
+        <DeviceImagePrint
           transaction={{
             ...transaction,
             customerData,
-            deviceData
+            deviceData,
           }}
         />
       </div>

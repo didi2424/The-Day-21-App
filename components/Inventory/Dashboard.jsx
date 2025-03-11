@@ -52,7 +52,7 @@ const Dashboard = () => {
         {session?.user ? (
           <>
             {/* Cards Section */}
-            <section className="space-y-4">
+            <section className="space-y-4   ">
               <h1 className="text-3xl font-bold">Inventory Assets</h1>
               <div className="grid grid-cols-4 gap-4">
                 <div className="col-span-3">
@@ -73,7 +73,7 @@ const Dashboard = () => {
             </section>
 
             {/* Drawer Section */}
-            <section className="space-y-4">
+            <section className="space-y-4 ">
               <h2 className="text-2xl font-bold">Drawyer</h2>
               <div className="flex justify-center items-start gap-8">
                 <div className="text-4xl font-bold">D1</div>

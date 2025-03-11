@@ -124,6 +124,20 @@ const TransactionPrintInvoice = ({ hardware, transaction, formatCurrency, format
         </p>
         <p>📝 * Harap simpan invoice ini untuk klaim garansi.</p>
       </div>
+
+            {/* Footer */}
+      <div className="mt-8 pt-4 border-t border-gray-200">
+        <div className="flex justify-between items-center text-xs text-gray-600">
+          <div>
+            <p className="font-medium">The Day 21 App Documentation</p>
+            <p>Generated: {new Date().toLocaleString()}</p>
+          </div>
+          <div className="text-right">
+            <p className="font-medium">Supercharging Happiness for Gamers & Creators</p>
+            <p>© {new Date().getFullYear()} The Day 21 Group</p>
+          </div>
+        </div>
+        </div>
     </div>
   );
 };

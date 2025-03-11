@@ -2,11 +2,11 @@ import { MdArrowOutward } from "react-icons/md";
 
 const InventoryCard = ({ title, subTitle, stock, price, quantity, brands }) => {
   return (
-    <div className="flex-1 bg-[#feffff] p-3 rounded-md gap-3">
+    <div className="flex-1 bg-white/1 backdrop-blur-lg border border-white/20 shadow-lg  p-3 rounded-md gap-3 ">
       <div className="flex justify-between ">
         <div>
-          <div className="flex text-black font-medium">{title}</div>
-          <div className="text-black text-sm">{subTitle}</div>
+          <div className="flex text-white font-medium">{title}</div>
+          <div className="text-white text-sm">{subTitle}</div>
         </div>
         <div className="bg-[#b9ec8f] text-xs text-white rounded-full w-7 h-7 flex items-center justify-center">
           <MdArrowOutward className="text-black" />

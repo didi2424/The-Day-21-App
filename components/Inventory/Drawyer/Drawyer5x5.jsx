@@ -34,14 +34,14 @@ const SvgIcon = ({ setHoveredGroup }) => {
         <path
       id="barTop"
       fill="none"
-      stroke="#231f20"
+      stroke="#ffffff"
       strokeMiterlimit="10"
       d="M10.5.5h780c5.52 0 10 4.48 10 10v4H.5v-4c0-5.52 4.48-10 10-10Z"
     ></path>
     <path
       id="barBottom"
       fill="none"
-      stroke="#231f20"
+      stroke="#ffffff"
       strokeMiterlimit="10"
       d="M10.5 466.5h780c5.52 0 10 4.48 10 10v4H.5v-4c0-5.52 4.48-10 10-10Z"
       transform="rotate(180 400.5 473.5)"
@@ -49,14 +49,14 @@ const SvgIcon = ({ setHoveredGroup }) => {
     <path
       id="sideleft"
       fill="none"
-      stroke="#231f20"
+      stroke="#ffffff"
       strokeMiterlimit="10"
       d="M.5 14.5h8v452h-8z"
     ></path>
     <path
       id="sideright"
       fill="none"
-      stroke="#231f20"
+      stroke="#ffffff"
       strokeMiterlimit="10"
       d="M792.5 14.5h8v452h-8z"
     ></path>
@@ -66,7 +66,7 @@ const SvgIcon = ({ setHoveredGroup }) => {
           key={id}
           id={id}
           fill="#0000"
-          stroke="#231f20"
+          stroke="#ffffff"
           strokeMiterlimit="10"
           onMouseEnter={() => setHoveredGroup(id)}
           onMouseLeave={() => setHoveredGroup('Not Selected')}

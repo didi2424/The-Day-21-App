@@ -155,15 +155,19 @@ const StockAdd = () => {
     }
   };
   return (
-    <div>
-      <div className="">
-        <h2 className="text-2xl font-bold">Stock Add</h2>
-        {/* Button to open the modal */}
+    <div className="  text-gray-100 h-[540px]">
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-800/20 to-pink-900/20" />
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-500/20 rounded-full mix-blend-multiply filter blur-[128px]"></div>
+        <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-purple-500/20 rounded-full mix-blend-multiply filter blur-[128px]"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-[700px] h-[700px] bg-pink-500/20 rounded-full mix-blend-multiply filter blur-[128px]"></div>
       </div>
+
+      <h2 className="text-2xl font-bold">Stock Add</h2>
 
       <div className="flex flex-1 gap-6">
         {/* left menu */}
-        <div className="bg-[#f7f7f7]  p-4 rounded-md  mt-4 w-[60%]">
+        <div className=" p-4 rounded-md  mt-4 w-[60%]">
           <div className="text-xl font-bold">General Information</div>
           {/* col 1 */}
           <div className="flex flex-col gap-2">
@@ -174,7 +178,7 @@ const StockAdd = () => {
               value={formData.name}
               onChange={handleChange}
               placeholder="Input Name"
-              className="w-full rounded-md bg-[#efefef] p-2 shadow-sm"
+              className="flex-1 px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
             />
           </div>
           {/* col 2 */}
@@ -187,7 +191,7 @@ const StockAdd = () => {
                 placeholder="Input Price"
                 value={formData.price}
                 onChange={handleChange}
-                className="w-full rounded-md bg-[#efefef] p-2"
+                className="flex-1 px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
               />
             </div>
 
@@ -198,7 +202,7 @@ const StockAdd = () => {
                 value={formData.manufacture} // Make sure to bind the selected value to formData.Category
                 onChange={(e) => handleChange(e)}
                 name="manufacture"
-                className="w-full rounded-md bg-[#efefef] p-2"
+                className="flex-1 px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
               >
                 <option className="text-sm" value="Alpha & Omega">
                   Alpha & Omega
@@ -239,7 +243,7 @@ const StockAdd = () => {
                 name="marking"
                 value={formData.marking}
                 onChange={handleChange}
-                className="w-full rounded-md bg-[#efefef] p-2"
+                className="flex-1 px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
               />
             </div>
 
@@ -250,7 +254,7 @@ const StockAdd = () => {
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className="w-full rounded-md bg-[#efefef] p-2"
+                className="flex-1 px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
               />
             </div>
 
@@ -261,7 +265,7 @@ const StockAdd = () => {
                 name="subcategory"
                 value={formData.subcategory}
                 onChange={handleChange}
-                className="w-full rounded-md bg-[#efefef] p-2"
+                className="flex-1 px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
               />
             </div>
 
@@ -272,7 +276,7 @@ const StockAdd = () => {
                 name="packagetype"
                 value={formData.packagetype}
                 onChange={handleChange}
-                className="w-full rounded-md bg-[#efefef] p-2"
+                className="flex-1 px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
               />
             </div>
           </div>
@@ -288,7 +292,7 @@ const StockAdd = () => {
                 value={formData.stroage}
                 onChange={handleChange}
                 placeholder="Storage"
-                className="w-full rounded-md bg-[#efefef] p-2"
+                className="flex-1 px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
               />
             </div>
 
@@ -301,7 +305,7 @@ const StockAdd = () => {
                   value={formData.row}
                   onChange={handleChange}
                   placeholder="Row"
-                  className="w-full rounded-md bg-[#efefef] p-2"
+                  className="flex-1 px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
                 />
               </div>
 
@@ -314,7 +318,7 @@ const StockAdd = () => {
                   value={formData.column}
                   onChange={handleChange}
                   placeholder="Column"
-                  className="w-full rounded-md bg-[#efefef] p-2"
+                  className="flex-1 px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
                 />
               </div>
             </div>
@@ -328,15 +332,15 @@ const StockAdd = () => {
               value={formData.description}
               onChange={handleChange}
               placeholder="Input Details. ie, This is a PWM Controller....."
-              className="w-full rounded-md bg-[#efefef] p-2 mt-2"
-              rows="6"
+              className=" w-full px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500 mt-2"
+              rows="5"
             />
           </div>
         </div>
 
         {/* right menu */}
-        <div className="flex flex-1 flex-col mt-4 w-[40%] gap-4">
-          <div className="bg-[#f7f7f7] p-4 rounded-lg  ">
+        <div className="flex flex-1 flex-col mt-4 w-[40%] gap-4 ">
+          <div className="bg-[#1a2237]/40 backdrop-blur-lg p-6 rounded-xl border border-[#2a3548] shadow-lg flex flex-col  ">
             <h2 className="text-lg font-bold mb-2">Product Images</h2>
             <div className="flex p-4 gap-2 justify-center">
               <label className="w-48 h-48 bg-gray-300 flex items-center justify-center cursor-pointer overflow-hidden rounded-md">
@@ -387,7 +391,7 @@ const StockAdd = () => {
             </div>
           </div>
 
-          <div className="bg-[#f7f7f7] rounded-md p-4">
+          <div className=" bg-[#1a2237]/40 backdrop-blur-lg p-4 rounded-xl border border-[#2a3548] shadow-lg flex flex-col ">
             <p className="text-xl font-bold">Stock</p>
 
             <div className="flex flex-1 gap-3">
@@ -399,7 +403,7 @@ const StockAdd = () => {
                   value={formData.stock}
                   onChange={handleChange}
                   placeholder="Stock"
-                  className="w-full rounded-md bg-[#efefef] p-2"
+                  className="flex-1 px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
                 />
               </div>
 
@@ -411,13 +415,13 @@ const StockAdd = () => {
                   value={formData.sku}
                   onChange={handleChange}
                   placeholder="optional"
-                  className="w-full rounded-md bg-[#efefef] p-2"
+                  className="flex-1 px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
                 />
               </div>
             </div>
           </div>
 
-          <div className="bg-[#f7f7f7] p-4 flex flex-1 flex-col rounded-md gap-2 ">
+          <div className=" p-4 flex flex-1 flex-col rounded-md gap-2 bg-[#1a2237]/40 backdrop-blur-lg border border-[#2a3548] shadow-lg  ">
             <p className="text-xl font-bold ">Condition</p>
 
             <select
@@ -425,7 +429,7 @@ const StockAdd = () => {
               value={formData.condition} // Make sure to bind the selected value to formData.Category
               onChange={(e) => handleChange(e)}
               name="condition"
-              className="w-full rounded-md bg-[#efefef] p-2"
+              className="flex-1 px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
             >
               <option className="text-sm" value="New">
                 New
@@ -436,7 +440,7 @@ const StockAdd = () => {
             </select>
           </div>
           <div
-            className="topactive_btn inline-flex items-center justify-center px-4 py-2 rounded-md text-center cursor-pointer mt-4 max-w-max"
+            className="topactive_btn inline-flex items-center justify-center px-6 py-2 rounded-md text-center cursor-pointer mt-4 max-w-max border border-[#2a3548]"
             onClick={handleSubmit}
           >
             Save

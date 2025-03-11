@@ -95,8 +95,8 @@ const EditModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-end items-center z-50">
-      <div className="bg-white rounded-lg  w-1/3 h-full p-6 ">
+    <div className="fixed inset-0  bg-opacity-50 flex justify-end items-center z-50">
+      <div className="bg-white/1 backdrop-blur-lg border border-white/20 p-6 rounded-2xl shadow-lg   w-1/3 h-full ">
         <h2 className="text-xl font-bold mb-5">Edit Customer</h2>
 
         {/* Name and Phone */}
@@ -108,7 +108,7 @@ const EditModal = ({
               name="constumer_name"
               value={formData.constumer_name}
               onChange={handleChange}
-              className="w-full rounded-md bg-[#efefef] p-2"
+              className="w-full p-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
             />
           </div>
 
@@ -119,7 +119,7 @@ const EditModal = ({
               name="wa_number"
               value={formData.wa_number}
               onChange={handleChange}
-              className="w-full rounded-md bg-[#efefef] p-2"
+              className="w-full p-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
             />
           </div>
         </div>
@@ -133,7 +133,7 @@ const EditModal = ({
               name="company"
               value={formData.company}
               onChange={handleChange}
-              className="w-full rounded-md bg-[#efefef] p-2"
+              className="w-full p-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
             />
           </div>
 
@@ -144,7 +144,7 @@ const EditModal = ({
               name="organisation"
               value={formData.organisation}
               onChange={handleChange}
-              className="w-full rounded-md bg-[#efefef] p-2"
+              className="w-full p-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
             />
           </div>
         </div>
@@ -174,7 +174,7 @@ const EditModal = ({
             name="street"
             value={formData.street}
             onChange={handleChange}
-            className="w-full rounded-md bg-[#efefef] p-2"
+            className="w-full p-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
           />
 
           <div className="flex gap-3 mt-3">
@@ -185,7 +185,7 @@ const EditModal = ({
                 name="city"
                 value={formData.city}
                 onChange={handleChange}
-                className="w-full rounded-md bg-[#efefef] p-2"
+                className="w-full p-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
               />
             </div>
 
@@ -196,7 +196,7 @@ const EditModal = ({
                 name="kecamatan"
                 value={formData.kecamatan}
                 onChange={handleChange}
-                className="w-full rounded-md bg-[#efefef] p-2"
+                className="w-full p-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
               />
             </div>
 
@@ -207,7 +207,7 @@ const EditModal = ({
                 name="kabupaten"
                 value={formData.kabupaten}
                 onChange={handleChange}
-                className="w-full rounded-md bg-[#efefef] p-2"
+                className="w-full p-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
               />
             </div>
           </div>
@@ -220,7 +220,7 @@ const EditModal = ({
                 name="province"
                 value={formData.province}
                 onChange={handleChange}
-                className="w-full rounded-md bg-[#efefef] p-2"
+                className="w-full p-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
               />
             </div>
 
@@ -231,7 +231,7 @@ const EditModal = ({
                 name="postal_code"
                 value={formData.postal_code}
                 onChange={handleChange}
-                className="w-full rounded-md bg-[#efefef] p-2"
+                className="w-full p-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
               />
             </div>
           </div>

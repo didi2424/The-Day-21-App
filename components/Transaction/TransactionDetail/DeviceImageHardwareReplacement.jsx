@@ -161,14 +161,14 @@ const DeviceImageHardwareReplacement = ({ transactionId }) => {
   };
 
   return (
-    <>
-      <div className="w-full">
+    <div className="flex flex-col h-full">
+      <div className="flex-grow">
         <div className={`grid ${getGridClass(images.length)} gap-3`}>
           {images && images.length > 0 ? (
             images.map((image, index) => (
               <div 
                 key={image._id} 
-                className="relative h-[200px] border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                className="relative h-[200px]  rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
                 onClick={() => openModal(index)}
               >
                 {image.imageData ? (
@@ -196,9 +196,13 @@ const DeviceImageHardwareReplacement = ({ transactionId }) => {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="">
         <button
           onClick={handlePrint}
-          className="mt-4 px-4 py-2 bg-[#b9ec8f] text-black rounded-md hover:bg-[#a5d880]"
+          className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl
+                         hover:opacity-90 transition-all duration-300 shadow-lg"
         >
           Print Images
         </button>
@@ -273,7 +277,7 @@ const DeviceImageHardwareReplacement = ({ transactionId }) => {
         </div>
         
       )}
-    </>
+    </div>
   );
 };
 

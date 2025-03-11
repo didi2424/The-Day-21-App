@@ -200,8 +200,8 @@ const EditModal = ({ isModalOpen, closeModal, selectedInventory, refreshData }) 
     }
   };
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-      <div className="bg-white p-6 rounded-md w-2/3">
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 ">
+      <div className=" w-2/3 bg-white/1 backdrop-blur-lg border border-white/20 p-6 rounded-2xl shadow-lg  ">
         <h2 className="text-xl font-bold">Edit {formData.name}</h2>
         <div className="">{formData._id}</div>
 
@@ -217,7 +217,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedInventory, refreshData }) 
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full rounded-md bg-gray-100 p-2"
+                className="w-full px-3 py-2 p-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
                 placeholder="Enter name"
               />
             </div>
@@ -231,7 +231,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedInventory, refreshData }) 
                   value={displayPrice}
                   onChange={handlePriceChange}
                   onBlur={handlePriceBlur}
-                  className="w-full rounded-md bg-gray-100 p-2"
+                  className="w-full px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
                   placeholder="Enter price"
                 />
               </div>
@@ -243,7 +243,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedInventory, refreshData }) 
                   name="manufacture"
                   value={formData.manufacture}
                   onChange={handleChange}
-                  className="w-full rounded-md bg-gray-100 p-2"
+                  className="w-full px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
                   placeholder="Enter manufacture"
                 />
               </div>
@@ -257,7 +257,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedInventory, refreshData }) 
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
-                  className="w-full rounded-md bg-gray-100 p-2"
+                  className="w-full px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
                   placeholder="Enter category"
                 />
               </div>
@@ -269,7 +269,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedInventory, refreshData }) 
                   name="subcategory"
                   value={formData.subcategory}
                   onChange={handleChange}
-                  className="w-full rounded-md bg-gray-100 p-2"
+                  className="w-full px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
                   placeholder="Enter subcategory"
                 />
               </div>
@@ -281,7 +281,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedInventory, refreshData }) 
                   name="stroage"
                   value={formData.stroage}
                   onChange={handleChange}
-                  className="w-full rounded-md bg-gray-100 p-2"
+                  className="w-full px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
                   placeholder="Enter storage"
                 />
               </div>
@@ -313,7 +313,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedInventory, refreshData }) 
                   name="marking"
                   value={formData.marking}
                   onChange={handleChange}
-                  className="w-full rounded-md bg-gray-100 p-2"
+                  className="w-full px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
                   placeholder="Enter marking"
                 />
               </div>
@@ -327,7 +327,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedInventory, refreshData }) 
                   name="packagetype"
                   value={formData.packagetype}
                   onChange={handleChange}
-                  className="w-full rounded-md bg-gray-100 p-2"
+                  className="w-full px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
                   placeholder="Enter package type"
                 />
               </div>
@@ -339,7 +339,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedInventory, refreshData }) 
                   name="row"
                   value={formData.row}
                   onChange={handleChange}
-                  className="w-full rounded-md bg-gray-100 p-2"
+                  className="w-full px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
                   placeholder="Enter row"
                 />
               </div>
@@ -351,7 +351,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedInventory, refreshData }) 
                   name="column"
                   value={formData.column}
                   onChange={handleChange}
-                  className="w-full rounded-md bg-gray-100 p-2"
+                  className="w-full px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
                   placeholder="Enter column"
                 />
               </div>
@@ -365,7 +365,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedInventory, refreshData }) 
                   type="text"
                   value={formData.description}
                   onChange={handleChange}
-                  className="w-full rounded-md bg-gray-100 p-2 "
+                  className="w-full px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500 "
                   placeholder="Enter description"
                   rows={6}
                 />
@@ -380,7 +380,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedInventory, refreshData }) 
                   name="sku"
                   value={formData.sku}
                   onChange={handleChange}
-                  className="w-full rounded-md bg-gray-100 p-2"
+                  className="w-full px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
                   placeholder="Enter SKU"
                 />
               </div>
@@ -392,7 +392,7 @@ const EditModal = ({ isModalOpen, closeModal, selectedInventory, refreshData }) 
                   name="stock"
                   value={formData.stock}
                   onChange={handleChange}
-                  className="w-full rounded-md bg-gray-100 p-2"
+                  className="w-full px-3 py-2 bg-[#131b2e]/60 border border-[#2a3548] rounded-md focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500"
                   placeholder="Enter SKU"
                 />
               </div>

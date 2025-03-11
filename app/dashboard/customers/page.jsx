@@ -40,8 +40,8 @@ const DashboardConstumersDashboard = ({ activeButton, }) => {
                 <Provider>
                     {session?.user ? (
                         <>
-                            <h1 className="text-3xl font-bold">Welcome {session?.user.name}</h1>
-                            <p className="mt-4">Welcome to your admin panel. Choose a menu item to get started.</p>
+                            <h1 className="text-3xl font-bold text-white">Welcome {session?.user.name}</h1>
+                            <p className="mt-4 text-white">Welcome to your admin panel. Choose a menu item to get started.</p>
 
                             
                             
@@ -68,15 +68,15 @@ function inventory() {
 
     return (
         <Provider>
-            <div className="h-screen flex flex-col w-full">
+            <div className="h-screen flex flex-col w-full bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900">
                 {/* Navbar */}
                 <header className="p-4">
 
                     <NavbarAdmin />
 
                 </header>
-                <div className='justify-between flex pr-4 pl-4'>
-                <div className="text-sm">
+                <div className='justify-between flex pr-4 pl-4 text-cyan-400'>
+                <div className="text-sm ">
                         {getBreadcrumb()}
                     </div>
 
@@ -93,7 +93,7 @@ function inventory() {
                     />
 
                     {/* Main Content Section */}
-                    <div className="flex-1 p-8 overflow-auto rounded-[20px] border border-gray-500 m-3 bg-[#fefdfb]">
+                    <div className="flex-1 p-5 overflow-auto rounded-[20px] border border-purple-500/30 m-3 bg-slate-900/70 backdrop-blur-xl shadow-lg shadow-purple-500/10 text-white ">
                         <DashboardConstumersDashboard activeButton={activeButton} />
                     </div>
                 </div>

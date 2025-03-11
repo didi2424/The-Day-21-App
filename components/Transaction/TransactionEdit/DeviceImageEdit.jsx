@@ -1,29 +1,36 @@
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { FaTrash } from 'react-icons/fa';
-import { toast } from 'react-toastify';
-import DeviceImageEditHardwareReplacement from './DeviceImageEditHardwareReplacement';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { FaTrash } from "react-icons/fa";
+import { toast } from "react-toastify";
+import DeviceImageEditHardwareReplacement from "./DeviceImageEditHardwareReplacement";
 
-const DeviceImageEdit = ({ formStep, setFormStep, transaction, handleSubmit, setCurrentComponent }) => {
-  const [mainImage, setMainImage] = useState(transaction.images?.main?.imageData || null);
+const DeviceImageEdit = ({ transaction, handleSubmit }) => {
+  const [mainImage, setMainImage] = useState(
+    transaction.images?.main?.imageData || null
+  );
   const [additionalImages, setAdditionalImages] = useState(
-    transaction.images?.additional?.map(img => img.imageData) || []
+    transaction.images?.additional?.map((img) => img.imageData) || []
   );
-  const [mainImageBase64, setMainImageBase64] = useState(transaction.images?.main?.imageData || '');
+  const [mainImageBase64, setMainImageBase64] = useState(
+    transaction.images?.main?.imageData || ""
+  );
   const [additionalImagesBase64, setAdditionalImagesBase64] = useState(
-    transaction.images?.additional?.map(img => img.imageData) || []
+    transaction.images?.additional?.map((img) => img.imageData) || []
   );
+  const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    console.log('Transaction ID:', transaction._id);
+    console.log("Transaction ID:", transaction._id);
     // Fetch existing images on mount
     const fetchImages = async () => {
       try {
-        const response = await fetch(`/api/transaction/images/${transaction._id}`);
+        const response = await fetch(
+          `/api/transaction/images/${transaction._id}`
+        );
         const data = await response.json();
-        console.log('Fetched images from API:', data);
+        console.log("Fetched images from API:", data);
       } catch (error) {
-        console.error('Error fetching images:', error);
+        console.error("Error fetching images:", error);
       }
     };
     fetchImages();
@@ -31,13 +38,16 @@ const DeviceImageEdit = ({ formStep, setFormStep, transaction, handleSubmit, set
 
   const handleImageChange = async (e, type, index) => {
     const file = e.target.files[0];
-    console.log(`Image change triggered - Type: ${type}, Index: ${index}, File:`, file);
-    
+    console.log(
+      `Image change triggered - Type: ${type}, Index: ${index}, File:`,
+      file
+    );
+
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        if (type === 'main') {
-          console.log('Updating main image');
+        if (type === "main") {
+          console.log("Updating main image");
           setMainImage(URL.createObjectURL(file));
           setMainImageBase64(reader.result);
         } else {
@@ -49,6 +59,7 @@ const DeviceImageEdit = ({ formStep, setFormStep, transaction, handleSubmit, set
           setAdditionalImages(newImages);
           setAdditionalImagesBase64(newBase64Images);
         }
+        setHasChanges(true); // Set changes flag when image is changed
       };
       reader.readAsDataURL(file);
     }
@@ -56,78 +67,79 @@ const DeviceImageEdit = ({ formStep, setFormStep, transaction, handleSubmit, set
 
   const handleDeleteImage = (type, index) => {
     console.log(`Deleting image - Type: ${type}, Index: ${index}`);
-    if (type === 'main') {
+    if (type === "main") {
       setMainImage(null);
-      setMainImageBase64('');
+      setMainImageBase64("");
     } else {
       const newImages = [...additionalImages];
       const newBase64Images = [...additionalImagesBase64];
       newImages[index] = null;
-      newBase64Images[index] = '';
+      newBase64Images[index] = "";
       setAdditionalImages(newImages);
       setAdditionalImagesBase64(newBase64Images);
     }
+    setHasChanges(true); // Set changes flag when image is deleted
   };
 
   const handleSaveImages = async () => {
-    console.log('Starting image save process for transaction:', transaction._id);
-    
     try {
       // Filter out empty images
       const validAdditionalImages = additionalImagesBase64
-        .filter(base64 => base64 && base64.trim() !== '')
-        .map(preview => ({ imageData: preview }));
+        .filter((base64) => base64 && base64.trim() !== "")
+        .map((preview) => ({ imageData: preview }));
 
       const imageData = {
         images: {
           main: mainImageBase64 ? { imageData: mainImageBase64 } : null,
-          additional: validAdditionalImages
-        }
+          additional: validAdditionalImages,
+        },
       };
-      
-      console.log('Submitting images:', {
+
+      console.log("Submitting images:", {
         hasMain: !!imageData.images.main,
-        additionalCount: imageData.images.additional.length
+        additionalCount: imageData.images.additional.length,
       });
 
-      const response = await fetch(`/api/transaction/images/${transaction._id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(imageData)
-      });
+      const response = await fetch(
+        `/api/transaction/images/${transaction._id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(imageData),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('API Error Response:', errorData);
-        throw new Error(errorData.message || 'Failed to save images');
+        console.error("API Error Response:", errorData);
+        throw new Error(errorData.message || "Failed to save images");
       }
 
-      const savedImages = await response.json();
-      console.log('Successfully saved images:', savedImages.length);
-      
       await handleSubmit(imageData);
-      toast.success('Images saved successfully');
+      toast.success("Images saved successfully");
+      setHasChanges(false); // Reset changes flag after successful save
     } catch (error) {
-      console.error('Save Error:', error);
-      toast.error(error.message || 'Failed to save images');
+      console.error("Save Error:", error);
+      toast.error(error.message || "Failed to save images");
     }
   };
 
   return (
-    <div className="container mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="container mx-auto ">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
         {/* Device Image Section */}
         <div>
           <h3 className="text-lg font-semibold mb-4">Device Image</h3>
           <div className="w-full relative">
-            <div className="max-w-2xl mx-auto space-y-6">
-              
+            <div className=" mx-auto space-y-6 bg-white/1 backdrop-blur-lg border border-white/20 p-6 rounded-2xl shadow-lg">
               {/* Main Image */}
-              <div>
-                <label className="block text-sm font-medium mb-2">Main Image</label>
-                <div className="relative aspect-square w-[300px] rounded-lg overflow-hidden group">
-                  <Image 
-                    src={mainImage || '/placeholder.jpg'}
+              <div className="">
+                <label className="block text-sm font-medium mb-2">
+                  Main Image
+                </label>
+                <div className="relative aspect-square w-[240px] rounded-lg overflow-hidden group">
+                  <Image
+                    src={mainImage || "/placeholder.jpg"}
                     alt="Main device"
                     fill
                     className="rounded-lg object-cover"
@@ -135,7 +147,7 @@ const DeviceImageEdit = ({ formStep, setFormStep, transaction, handleSubmit, set
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => handleImageChange(e, 'main')}
+                    onChange={(e) => handleImageChange(e, "main")}
                     className="hidden"
                     id="main-image"
                   />
@@ -148,7 +160,7 @@ const DeviceImageEdit = ({ formStep, setFormStep, transaction, handleSubmit, set
                     </label>
                     {mainImage && (
                       <button
-                        onClick={() => handleDeleteImage('main')}
+                        onClick={() => handleDeleteImage("main")}
                         className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                       >
                         <FaTrash className="w-4 h-4" />
@@ -160,7 +172,9 @@ const DeviceImageEdit = ({ formStep, setFormStep, transaction, handleSubmit, set
 
               {/* Additional Images */}
               <div>
-                <label className="block text-sm font-medium mb-2">Additional Images</label>
+                <label className="block text-sm font-medium mb-2">
+                  Additional Images
+                </label>
                 <div className="grid grid-cols-4 gap-4 w-[300px]">
                   {[...Array(3)].map((_, index) => (
                     <div key={index} className="relative aspect-square">
@@ -181,7 +195,9 @@ const DeviceImageEdit = ({ formStep, setFormStep, transaction, handleSubmit, set
                                 Change
                               </label>
                               <button
-                                onClick={() => handleDeleteImage('additional', index)}
+                                onClick={() =>
+                                  handleDeleteImage("additional", index)
+                                }
                                 className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
                               >
                                 Delete
@@ -190,7 +206,9 @@ const DeviceImageEdit = ({ formStep, setFormStep, transaction, handleSubmit, set
                             <input
                               type="file"
                               accept="image/*"
-                              onChange={(e) => handleImageChange(e, 'additional', index)}
+                              onChange={(e) =>
+                                handleImageChange(e, "additional", index)
+                              }
                               className="hidden"
                               id={`additional-image-${index}`}
                             />
@@ -203,7 +221,9 @@ const DeviceImageEdit = ({ formStep, setFormStep, transaction, handleSubmit, set
                             <input
                               type="file"
                               accept="image/*"
-                              onChange={(e) => handleImageChange(e, 'additional', index)}
+                              onChange={(e) =>
+                                handleImageChange(e, "additional", index)
+                              }
                               className="hidden"
                               id={`additional-image-${index}`}
                             />
@@ -215,15 +235,26 @@ const DeviceImageEdit = ({ formStep, setFormStep, transaction, handleSubmit, set
                   ))}
                 </div>
               </div>
-
-             
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={handleSaveImages}
+                disabled={!hasChanges}
+                className={`px-4 py-2 rounded-xl bg-gradient-to-br from-blue-600/30 via-purple-600/30 to-blue-600/30 backdrop-blur-xl shadow-xl border border-white/30 ${
+                  !hasChanges ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                Save
+              </button>
             </div>
           </div>
         </div>
 
         {/* Hardware Replacement Section */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">Hardware Replacement Image</h3>
+          <h3 className="text-lg font-semibold mb-4">
+            Hardware Replacement Image
+          </h3>
           <DeviceImageEditHardwareReplacement
             transactionId={transaction._id}
             type="main"
@@ -232,23 +263,6 @@ const DeviceImageEdit = ({ formStep, setFormStep, transaction, handleSubmit, set
             }}
           />
         </div>
-      </div>
-
-      {/* Navigation Buttons */}
-      <div className="flex justify-end gap-4 mt-6">
-        <button
-          type="button"
-          onClick={() => setFormStep(1)}
-          className="px-4 py-2 border rounded-md hover:bg-gray-100"
-        >
-          Back
-        </button>
-        <button
-          onClick={handleSaveImages}
-          className="px-4 py-2 bg-[#b9ec8f] text-black rounded-md hover:bg-[#a5d880]"
-        >
-          Next: Add Hardware & Costs
-        </button>
       </div>
     </div>
   );

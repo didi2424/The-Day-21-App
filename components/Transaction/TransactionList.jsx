@@ -3,10 +3,11 @@ import { format } from "date-fns";
 import { toast } from "react-toastify";
 import { MdPersonSearch, MdOutlineTimelapse, MdClose } from "react-icons/md";
 import Image from "next/image";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { FaTrash } from "react-icons/fa";
 
-const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => { // Add these props
+const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => {
+  // Add these props
   const router = useRouter();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,6 +26,20 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => { // 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
 
+  const formatPhoneNumber = (number) => {
+    if (!number) return "";
+    // Hapus semua spasi dan karakter non-digit
+    let cleanedNumber = number.replace(/\D/g, "");
+    // Jika nomor diawali dengan 0, ubah ke +62
+    if (cleanedNumber.startsWith("0")) {
+      cleanedNumber = "+62" + cleanedNumber.substring(1);
+    } else if (!cleanedNumber.startsWith("+")) {
+      // Jika tidak ada kode negara, default ke +62
+      cleanedNumber = "+62" + cleanedNumber;
+    }
+    return cleanedNumber;
+  };
+
   // Debounce search term
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -39,9 +54,24 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => { // 
         `/api/transaction?page=${currentPage}&pageSize=${pageSize}`
       );
       if (!response.ok) throw new Error("Failed to fetch transactions");
-      
+
       const data = await response.json();
-      setTransactions(data.transactions);
+
+      // Fetch hardware data for each transaction
+      const transactionsWithHardware = await Promise.all(
+        data.transactions.map(async (transaction) => {
+          const hardwareResponse = await fetch(
+            `/api/transaction/hardware/byService/${transaction._id}`
+          );
+          const hardwareData = await hardwareResponse.json();
+          return {
+            ...transaction,
+            hardwareData,
+          };
+        })
+      );
+
+      setTransactions(transactionsWithHardware);
       setTotalTransactions(data.totalTransactions);
       setTotalPages(Math.ceil(data.totalTransactions / pageSize));
     } catch (error) {
@@ -61,7 +91,9 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => { // 
     setIsSearching(true);
     try {
       const response = await fetch(
-        `/api/transaction/search?term=${encodeURIComponent(debouncedSearchTerm)}&page=${currentPage}&pageSize=${pageSize}`
+        `/api/transaction/search?term=${encodeURIComponent(
+          debouncedSearchTerm
+        )}&page=${currentPage}&pageSize=${pageSize}`
       );
       if (!response.ok) throw new Error("Search failed");
 
@@ -91,38 +123,40 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => { // 
     setCurrentPage(1);
   };
 
-  const handleNext = () => currentPage < totalPages && setCurrentPage(prev => prev + 1);
-  const handleBack = () => currentPage > 1 && setCurrentPage(prev => prev - 1);
+  const handleNext = () =>
+    currentPage < totalPages && setCurrentPage((prev) => prev + 1);
+  const handleBack = () =>
+    currentPage > 1 && setCurrentPage((prev) => prev - 1);
 
   const handleViewDetails = (transactionId) => {
     // Instead of navigating to a new route, update the parent state
     setSelectedTransactionId(transactionId);
-    setActiveButton('Transaction Details');
+    setActiveButton("Transaction Details");
   };
 
   const handleEdit = (transaction) => {
     setSelectedTransactionId(transaction._id);
-    setActiveButton('Transaction Update');
+    setActiveButton("Transaction Update");
   };
 
   const handleDelete = async (transactionId) => {
     try {
       const response = await fetch(`/api/transaction/${transactionId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (response.ok) {
-        toast.success('Transaction deleted successfully');
+        toast.success("Transaction deleted successfully");
         setShowDeleteModal(false);
         setTransactionToDelete(null);
         // Refresh the transactions list
         fetchTransactions();
       } else {
-        throw new Error('Failed to delete transaction');
+        throw new Error("Failed to delete transaction");
       }
     } catch (error) {
-      toast.error('Failed to delete transaction');
-      console.error('Delete error:', error);
+      toast.error("Failed to delete transaction");
+      console.error("Delete error:", error);
     }
   };
 
@@ -132,166 +166,249 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => { // 
   };
 
   const getImageUrl = (imageData) => {
-    if (!imageData) return '/placeholder.jpg';
-    if (imageData.startsWith('data:image')) {
+    if (!imageData) return "/placeholder.jpg";
+    if (imageData.startsWith("data:image")) {
       return imageData;
     }
     // If it's not a base64 image, assume it's a URL
     return imageData;
   };
 
+  // Add this helper function for currency formatting
+  const formatCurrency = (amount) => {
+    return `Rp ${amount?.toLocaleString("id-ID")}`;
+  };
+
   if (loading) return <p>Loading transactions...</p>;
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <>
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold">Transaction List</h2>
-
-          <div className="relative w-full max-w-md">
-            <input
-              type="text"
-              placeholder="Search by service number or customer name..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
-            />
-            {searchTerm && (
-              <button
-                onClick={handleClearSearch}
-                className="absolute right-10 top-1/2 transform -translate-y-1/2 hover:bg-gray-100 p-1 rounded-full"
-              >
-                <MdClose className="text-gray-500 text-xl hover:text-gray-700" />
-              </button>
-            )}
-            {isSearching ? (
-              <MdOutlineTimelapse className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"/>
-            ) : (
-              <MdPersonSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"/>
-            )}
+    <div className=" ">
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-800/20 to-pink-900/20" />
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-500/20 rounded-full mix-blend-multiply filter blur-[128px]"></div>
+        <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-purple-500/20 rounded-full mix-blend-multiply filter blur-[128px]"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-[700px] h-[700px] bg-pink-500/20 rounded-full mix-blend-multiply filter blur-[128px]"></div>
+      </div>
+      <div className=" mx-auto p-4">
+        {/* Header Section */}
+        <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl border border-gray-700/50 p-6 mb-6 shadow-lg">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+              Transaction List
+            </h2>
+            <div className="relative w-full md:w-96">
+              <input
+                type="text"
+                placeholder="Search transactions..."
+                value={searchTerm}
+                onChange={handleSearch}
+                className="w-full px-4 py-2.5 rounded-lg bg-gray-800/50 border border-gray-700 text-gray-100 
+                  focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 
+                  focus:outline-none backdrop-blur-xl"
+              />
+              {searchTerm && (
+                <button
+                  onClick={handleClearSearch}
+                  className="absolute right-10 top-1/2 transform -translate-y-1/2 hover:bg-gray-100 p-1 rounded-full"
+                >
+                  <MdClose className="text-gray-500 text-xl hover:text-gray-700" />
+                </button>
+              )}
+              {isSearching ? (
+                <MdOutlineTimelapse className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+              ) : (
+                <MdPersonSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+              )}
+            </div>
           </div>
         </div>
 
-        <p>Total transactions: {totalTransactions}</p>
+        {/* Transaction List */}
+        <div className="bg-gray-800/30 backdrop-blur-xl rounded-xl border border-gray-700/50 overflow-hidden">
+          <ul className="divide-y divide-gray-700/50">
+            {transactions.length === 0 ? (
+              <p className="text-center py-4 text-gray-400">
+                No transactions found.
+              </p>
+            ) : (
+              transactions.map((transaction) => (
+                <li
+                  key={transaction._id}
+                  className="group hover:bg-gray-800/50 transition-all duration-300 relative overflow-hidden"
+                >
+                  {/* Glow effect on hover */}
+                  <div
+                    className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 
+                    group-hover:opacity-100 transition-opacity duration-300"
+                  />
 
-        <ul>
-          {transactions.length === 0 ? (
-            <p>No transactions found.</p>
-          ) : (
-            transactions.map((transaction) => {
-
-
-              return (
-                <li key={transaction._id}>
-                  <div className="flex flex-col pl-3 sm:flex-row rounded-lg shadow-sm h-31 pt-3 pb-3 mt-3">
-                    {/* Main Image Section - Updated */}
-                    <div className="flex-none w-16 mr-4">
+                  <div className="relative flex items-center px-4 py-4 gap-4">
+                    {/* Image Column */}
+                    <div className="flex-shrink-0">
                       {transaction.images?.main ? (
-                        <div className="w-16 h-16 relative rounded-lg overflow-hidden">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <div
+                          className="w-14 h-14 rounded-lg overflow-hidden border border-gray-700/50 
+                          ring-2 ring-gray-700/50 group-hover:ring-blue-500/50 transition-all duration-300"
+                        >
                           <img
                             src={getImageUrl(transaction.images.main.imageData)}
-                            alt="Main device"
+                            alt="Device"
                             className="w-full h-full object-cover"
                           />
                         </div>
                       ) : (
-                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
-                          <span className="text-xs text-gray-500">No Image</span>
+                        <div
+                          className="w-14 h-14 bg-gray-800 rounded-lg flex items-center justify-center 
+                          border border-gray-700/50"
+                        >
+                          <span className="text-xs text-gray-500">
+                            No Image
+                          </span>
                         </div>
                       )}
                     </div>
 
-                    {/* Service Info Section */}
-                    <div className="flex-1 flex gap-4 items-center">
-                      <div className="flex flex-col">
-                        <h3 className="font-satoshi font-semibold text-gray-900">
-                          {transaction.serviceNumber}
-                        </h3>
-                        <p className="font-inter text-sm text-gray-500">
-                          {transaction.deviceModel}
+                    {/* Service Info Column */}
+                    <div className="min-w-[160px]">
+                      <h3 className="text-sm font-medium text-blue-400">
+                        {transaction.serviceNumber}
+                      </h3>
+                      <p className="text-sm text-gray-400">
+                        {transaction.deviceModel}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {/* Customer Info Column */}
+                      <div className="min-w-[130px]">
+                        <p className="text-sm font-medium text-gray-100">
+                          {transaction.customer?.constumer_name}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          {transaction.customer?.wa_number}
                         </p>
                       </div>
-                    </div>
 
-                    {/* Customer Info Section - Updated */}
-                    <div className="flex-1">
-                      <div className="font-satoshi text-sm text-gray-700">
-                        {transaction.customer?.constumer_name}
+                      {/* ButtonChat */}
+                      <div className="min-w-[180px]">
+                        <p className="text-xs text-gray-100">Message</p>
+                        {transaction.customer?.wa_number && (
+                          <a
+                            href={`https://wa.me/${formatPhoneNumber(
+                              transaction.customer.wa_number
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-green-400 hover:underline"
+                          >
+                            Chat via WhatsApp
+                          </a>
+                        )}
                       </div>
-                      <p className="font-inter text-sm text-gray-500">
-                        {transaction.customer?.wa_number}
-                      </p>
                     </div>
 
-                    {/* Issues Section */}
-                    <div className="flex-1">
-                      <div className="flex flex-wrap gap-1">
-                        {transaction.selectedIssues?.map((issue, index) => (
-                          <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded-full">
-                            {issue.label}
+                    {/* Issues Column */}
+                    <div className="flex-1 min-w-[200px]">
+                      <div className="flex flex-wrap gap-1.5">
+                        {transaction.selectedIssues
+                          ?.slice(0, 2)
+                          .map((issue, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-0.5 text-xs font-medium bg-gray-700/50 text-blue-300 
+                              rounded-full border border-gray-600/50 backdrop-blur-xl"
+                            >
+                              {issue.label}
+                            </span>
+                          ))}
+                        {transaction.selectedIssues?.length > 2 && (
+                          <span
+                            className="px-2 py-0.5 text-xs font-medium bg-gray-700/50 text-purple-300 
+                            rounded-full border border-gray-600/50"
+                          >
+                            +{transaction.selectedIssues.length - 2} more
                           </span>
-                        ))}
+                        )}
                       </div>
                     </div>
 
-                    {/* Status and Date */}
-                    <div className="flex-1 flex justify-center flex-col">
-                      <p className={`font-medium text-sm ${
-                        transaction.status === 'pending' ? 'text-yellow-500' :
-                        transaction.status === 'in-progress' ? 'text-blue-500' :
-                        transaction.status === 'completed' ? 'text-green-500' :
-                        'text-red-500'
-                      }`}>
+                    {/* Status Column */}
+                    <div className="w-28 text-center">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full backdrop-blur-xl ${
+                          transaction.status === "pending"
+                            ? "bg-yellow-500/10 text-yellow-300 border border-yellow-500/50"
+                            : transaction.status === "in-progress"
+                            ? "bg-blue-500/10 text-blue-300 border border-blue-500/50"
+                            : transaction.status === "completed"
+                            ? "bg-green-500/10 text-green-300 border border-green-500/50"
+                            : "bg-red-500/10 text-red-300 border border-red-500/50"
+                        }`}
+                      >
                         {transaction.status}
-                      </p>
-                      <p className="font-satoshi text-xs text-gray-400">
-                        {format(new Date(transaction.createdAt), "MMM dd, yyyy HH:mm")}
+                      </span>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {format(
+                          new Date(transaction.createdAt),
+                          "MMM dd, HH:mm"
+                        )}
                       </p>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex-1 flex gap-2 items-center justify-end">
-                      <button 
+                    {/* Price Column */}
+                    <div className="w-32 text-center ">
+                      <p className="text-sm font-medium text-purple-400">
+                        {formatCurrency(
+                          transaction.hardwareData?.totalCost || 0
+                        )}
+                      </p>
+                    </div>
+
+                    {/* Actions Column */}
+                    <div className="w-32 flex justify-end gap-2">
+                      <button
                         onClick={() => handleViewDetails(transaction._id)}
-                        className="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                        className="px-3 py-1.5 text-xs font-medium text-blue-300 bg-blue-500/10 
+                          rounded border border-blue-500/50 hover:bg-blue-500/20 transition-colors"
                       >
-                        Details
+                        View
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleEdit(transaction)}
-                  
-                        className="px-3 py-1 text-sm bg-[#b9ec8f] text-white rounded-md hover:bg-[#a5d880]"
+                        className="px-3 py-1.5 text-xs font-medium text-purple-300 bg-purple-500/10 
+                          rounded border border-purple-500/50 hover:bg-purple-500/20 transition-colors"
                       >
                         Edit
                       </button>
-                      <button 
+                      <button
                         onClick={() => {
                           setTransactionToDelete(transaction);
                           setShowDeleteModal(true);
                         }}
-                        className="px-3 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-400"
+                        className="p-1.5 text-red-400 hover:bg-red-500/10 rounded transition-colors"
                       >
-                        Delete
+                        <FaTrash className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
                 </li>
-              );
-            })
-          )}
-        </ul>
+              ))
+            )}
+          </ul>
+        </div>
 
         {/* Delete Confirmation Modal */}
         {showDeleteModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+            <div className=" max-w-md w-full mx-4 bg-white/1 backdrop-blur-lg border border-white/20 p-6 rounded-2xl shadow-lg  ">
               <h3 className="text-lg font-bold mb-4">Confirm Delete</h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-white mb-6">
                 Are you sure you want to delete service number{" "}
-                <span className="font-semibold">{transactionToDelete?.serviceNumber}</span>?
-                This action cannot be undone.
+                <span className="font-semibold">
+                  {transactionToDelete?.serviceNumber}
+                </span>
+                ? This action cannot be undone.
               </p>
               <div className="flex justify-end gap-4">
                 <button
@@ -314,30 +431,43 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => { // 
           </div>
         )}
 
-        <div className="flex justify-between mt-4">
-          <p className="mt-2 text-sm">
+        {/* Pagination */}
+        <div
+          className="mt-6 flex items-center justify-between bg-gray-800/50 backdrop-blur-xl 
+          rounded-xl border border-gray-700/50 p-4"
+        >
+          <p className="text-sm text-gray-400">
             Page {currentPage} of {totalPages}
           </p>
-          <div className="gap-4 flex">
+          <div className="flex gap-3">
             <button
               onClick={handleBack}
               disabled={currentPage === 1}
-              className={`next_btn ${currentPage === 1 ? "cursor-not-allowed opacity-50" : "hover:bg-[#b9ec8f]"}`}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors
+                ${
+                  currentPage === 1
+                    ? "bg-gray-800/50 text-gray-600 cursor-not-allowed"
+                    : "bg-blue-500/10 text-blue-300 hover:bg-blue-500/20 border border-blue-500/50"
+                }`}
             >
-              Back
+              Previous
             </button>
             <button
               onClick={handleNext}
               disabled={currentPage === totalPages}
-              className={`next_btn ${currentPage === totalPages ? "cursor-not-allowed opacity-50" : "hover:bg-[#b9ec8f]"}`}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors
+                ${
+                  currentPage === totalPages
+                    ? "bg-gray-800/50 text-gray-600 cursor-not-allowed"
+                    : "bg-blue-500/10 text-blue-300 hover:bg-blue-500/20 border border-blue-500/50"
+                }`}
             >
               Next
             </button>
           </div>
         </div>
       </div>
-    
-    </>
+    </div>
   );
 };
 
