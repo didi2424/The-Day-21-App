@@ -17,6 +17,7 @@ export async function GET(request) {
         { sku: { $regex: search, $options: 'i' } },
         { category: { $regex: search, $options: 'i' } },
         { manufacture: { $regex: search, $options: 'i' } },
+        { marking: { $regex: search, $options: 'i' } },
       ]
     } : {};
 
@@ -25,7 +26,7 @@ export async function GET(request) {
     
     // Fetch inventory items with search and pagination
     const inventory = await Inventory.find(searchQuery)
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: -1, _id: -1 }) // Tambahkan _id sebagai secondary sort
       .skip((page - 1) * limit)
       .limit(limit);
 

@@ -13,20 +13,40 @@ export const GET = async (request) => {
     const pageSize = parseInt(searchParams.get('pageSize')) || 10;
     const skip = (page - 1) * pageSize;
 
-    // First find customers matching the search term
-    const matchingCustomers = await Constumer.find({
-      constumer_name: { $regex: term, $options: 'i' }
-    }).select('_id');
+    // Build the search query
+    let searchQuery = {};
 
-    const customerIds = matchingCustomers.map(customer => customer._id);
+    if (term) {
+      if (term.toLowerCase().includes('completed') || 
+          term.toLowerCase().includes('pending') || 
+          term.toLowerCase().includes('in-progress') || 
+          term.toLowerCase().includes('waiting-parts') || 
+          term.toLowerCase().includes('cancelled')) {
+        // If term contains status keywords, add status filter
+        const status = term.toLowerCase();
+        searchQuery.status = {
+          $regex: status,
+          $options: 'i'
+        };
+      } else {
+        // Search for customer info or service number
+        const matchingCustomers = await Constumer.find({
+          $or: [
+            { constumer_name: { $regex: term, $options: 'i' } },
+            { wa_number: { $regex: term, $options: 'i' } }
+          ]
+        }).select('_id');
 
-    // Create search query including customer search
-    const searchQuery = {
-      $or: [
-        { serviceNumber: { $regex: term, $options: 'i' } },
-        { customer: { $in: customerIds } }
-      ]
-    };
+        const customerIds = matchingCustomers.map(customer => customer._id);
+
+        searchQuery = {
+          $or: [
+            { serviceNumber: { $regex: term, $options: 'i' } },
+            { customer: { $in: customerIds } }
+          ]
+        };
+      }
+    }
 
     const transactions = await Transaction.find(searchQuery)
       .populate('customer')

@@ -27,11 +27,6 @@ const StockList = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  useEffect(() => {
-    fetchInventory(currentPage, pageSize);
-    fetchImages();
-  }, [currentPage]);
-
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage((prev) => prev + 1);
@@ -43,50 +38,6 @@ const StockList = () => {
       setCurrentPage((prev) => prev - 1);
     }
   };
-
-  const fetchImages = async (itemIds = []) => {
-    try {
-      const response = await fetch(
-        `/api/inventory/getimages/allimage/?items=${itemIds.join(",")}`
-      );
-      if (!response.ok) {
-        throw new Error("Gagal mengambil gambar.");
-      }
-      const data = await response.json();
-      setImages(data);
-    } catch (error) {
-      console.error("Error fetching images:", error);
-    }
-  };
-
-  const fetchInventory = useCallback(
-    async (page = 1, limit = 4, searchTerm = "") => {
-      try {
-        setIsSearching(!!searchTerm);
-        const queryParams = new URLSearchParams({
-          page: page,
-          limit: limit,
-          ...(searchTerm && { search: searchTerm }),
-        });
-
-        const response = await fetch(`/api/inventory?${queryParams}`);
-        if (!response.ok) throw new Error("Failed to fetch inventory");
-
-        const data = await response.json();
-        setInventory(data.inventory || []);
-        setTotalPages(data.totalPages);
-      } catch (error) {
-        console.error("Error fetching inventory:", error);
-      } finally {
-        setIsSearching(false);
-      }
-    },
-    []
-  );
-
-  useEffect(() => {
-    fetchInventory(currentPage, pageSize, debouncedSearchTerm);
-  }, [debouncedSearchTerm, currentPage, pageSize, fetchInventory]);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -117,24 +68,90 @@ const StockList = () => {
     setSelectedInventory(null);
   };
 
-  useEffect(() => {
-    if (inventory && Array.isArray(inventory) && inventory.length > 0) {
-      const itemIds = inventory.map((item) => item.id || item._id);
-      fetchImages(itemIds);
-    }
-  }, [inventory]);
-
   const refreshData = async () => {
-    await fetchInventory(currentPage, pageSize); // Tunggu hingga inventory diperbarui
-    if (inventory.length > 0) {
-      const itemIds = inventory.map((item) => item.id || item._id);
-      fetchImages(itemIds); // Fetch images berdasarkan inventory terbaru
+    try {
+      const queryParams = new URLSearchParams({
+        page: currentPage,
+        limit: pageSize,
+        ...(debouncedSearchTerm && { 
+          search: debouncedSearchTerm,
+          searchFields: 'name,sku,marking,category'  // Add marking to search fields
+        }),
+      });
+
+      const response = await fetch(`/api/inventory?${queryParams}`);
+      if (!response.ok) throw new Error("Failed to fetch inventory");
+      const data = await response.json();
+      
+      setInventory(data.inventory || []);
+      setTotalPages(data.totalPages);
+
+      if (data.inventory?.length > 0) {
+        const itemIds = data.inventory.map(item => item._id);
+        const imageResponse = await fetch(
+          `/api/inventory/getimages/allimage/?items=${itemIds.join(",")}`
+        );
+        if (imageResponse.ok) {
+          const imageData = await imageResponse.json();
+          setImages(imageData);
+        }
+      }
+    } catch (error) {
+      console.error("Error refreshing data:", error);
     }
   };
 
   const handleViewDetails = (itemId) => {
     router.push(`/inventory/details/${itemId}`);
   };
+
+  // Hapus useEffect yang terpisah untuk fetchInventory dan fetchImages
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsSearching(true);
+        
+        const queryParams = new URLSearchParams({
+          page: currentPage,
+          limit: pageSize,
+          ...(debouncedSearchTerm && { 
+            search: debouncedSearchTerm,
+            searchFields: 'name,sku,marking,category'  // Add marking to search fields
+          }),
+        });
+
+        const response = await fetch(`/api/inventory?${queryParams}`);
+        if (!response.ok) throw new Error("Failed to fetch inventory");
+        const data = await response.json();
+        
+        // Reset data lama sebelum mengisi data baru
+        setInventory([]);
+        setImages([]);
+        
+        // Set data baru
+        setInventory(data.inventory || []);
+        setTotalPages(data.totalPages);
+
+        // Fetch images hanya jika ada inventory baru
+        if (data.inventory?.length > 0) {
+          const itemIds = data.inventory.map(item => item._id);
+          const imageResponse = await fetch(
+            `/api/inventory/getimages/allimage/?items=${itemIds.join(",")}`
+          );
+          if (imageResponse.ok) {
+            const imageData = await imageResponse.json();
+            setImages(imageData);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    loadData();
+  }, [currentPage, pageSize, debouncedSearchTerm]);
 
   return (
     <div className="bg-gray-900 rounded-xl p-4 text-gray-100">
@@ -150,10 +167,12 @@ const StockList = () => {
         <div className="relative w-full max-w-md">
           <input
             type="text"
-            placeholder="Search by name, SKU, or category..."
+            placeholder="Search by name, SKU, marking, or category..."
             value={searchTerm}
             onChange={handleSearch}
-            className="w-full px-4 py-2 text-sm text-gray-900 bg-gray-800/20 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500"
+            className="w-full px-4 py-2.5 rounded-lg bg-gray-800/50 border border-gray-700 text-gray-100 
+                  focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 
+                  focus:outline-none backdrop-blur-xl"
           />
           {searchTerm && (
             <button
@@ -180,7 +199,7 @@ const StockList = () => {
               return (
                 <li key={item.id || item._id}>
                   <div className="bg-gray-800/40 backdrop-blur-sm rounded-lg p-4 hover:bg-gray-800/60 transition-colors">
-                    <div className="grid grid-cols-8 gap-4 items-center">
+                    <div className="grid grid-cols-9 gap-4 items-center">
                       <div>
                         <div className="font-bold text-lg text-blue-400">
                           {item.name}
@@ -197,6 +216,14 @@ const StockList = () => {
                           Row Column: R{item.row} C{item.column}
                         </div>
                       </div>
+
+                      <div className="text-gray-300">
+                        <div>Marking</div>
+                        <div>
+                          {item.marking} 
+                        </div>
+                      </div>
+
                       <div>
                         <div className="text-gray-300">{item.manufacture}</div>
                         <div className="text-gray-400">

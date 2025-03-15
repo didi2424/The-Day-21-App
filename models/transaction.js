@@ -41,7 +41,7 @@ const TransactionSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'in-progress', 'completed', 'cancelled'],
+    enum: ['pending', 'in-progress', 'completed', 'cancelled','waiting-parts'],
     default: 'pending'
   },
 

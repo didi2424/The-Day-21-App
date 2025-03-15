@@ -2,7 +2,7 @@ import { connectToDB } from "@utils/database";
 import Transaction from "@models/transaction";
 import TransactionImage from "@models/transactionImage";
 import Customer from "@models/constumer"; // Import Customer model
-import mongoose from 'mongoose';
+
 
 export const GET = async (request) => {
   try {
@@ -10,7 +10,7 @@ export const GET = async (request) => {
     
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page')) || 1;
-    const pageSize = parseInt(searchParams.get('pageSize')) || 10;
+    const pageSize = parseInt(searchParams.get('pageSize')) || 5;
     const skip = (page - 1) * pageSize;
 
 

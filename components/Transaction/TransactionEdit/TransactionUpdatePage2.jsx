@@ -6,6 +6,7 @@ const TransactionUpdatePage2 = ({
   selectedTransactionId,
   setActiveButton,
   setFormStep,
+  onTotalCostChange,
 }) => {
   const [loading, setLoading] = useState(false);
   const [totalCost, setTotalCost] = useState(0);
@@ -140,6 +141,13 @@ const TransactionUpdatePage2 = ({
 
     setTotalCost(hardwareTotal + serviceTotal);
   }, [replacedHardware, serviceCost]);
+
+  // Add effect to notify parent of total cost changes
+  useEffect(() => {
+    if (onTotalCostChange) {
+      onTotalCostChange(totalCost);
+    }
+  }, [totalCost, onTotalCostChange]);
 
   useEffect(() => {
     const fetchExistingTransaction = async () => {

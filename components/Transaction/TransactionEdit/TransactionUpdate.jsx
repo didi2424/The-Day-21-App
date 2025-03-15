@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import DeviceImageEdit from "./DeviceImageEdit";
 import TransactionUpdatePage2 from "./TransactionUpdatePage2";
+import TransactionUpdatePage3 from "./TransactionUpdatePage3"; // Add this import
 
 const TransactionUpdate = ({ setActiveButton, selectedTransactionId }) => {
   const [transaction, setTransaction] = useState(null);
@@ -24,6 +25,12 @@ const TransactionUpdate = ({ setActiveButton, selectedTransactionId }) => {
   const [additionalImagesBase64, setAdditionalImagesBase64] = useState([]);
   const [formStep, setFormStep] = useState(1); // Add this state
   const [currentComponent, setCurrentComponent] = useState("basic"); // Add this state
+  const [totalCost, setTotalCost] = useState(0); // Add this state
+
+  // Add this handler
+  const handleTotalCostChange = (cost) => {
+    setTotalCost(cost);
+  };
 
   // Options for form selects
   const commonIssuesOptions = [
@@ -31,12 +38,13 @@ const TransactionUpdate = ({ setActiveButton, selectedTransactionId }) => {
     { id: "artifacts", label: "Artifacts" },
     { id: "fan-issue", label: "Fan Issue" },
     { id: "overheating", label: "Overheating" },
-    { id: "bsod", label: "BSOD" },
+    { id: "short-5v", label: "Short 5v" },
     { id: "driver-crash", label: "Driver Crash" },
     { id: "no-power", label: "No Power" },
     { id: "memory-error", label: "Memory Error" },
-    { id: "pcie-error", label: "PCIe Error" },
-    { id: "coil-whine", label: "Coil Whine" },
+    { id: "short-1.8v", label: "Short 1.8v" },
+    { id: "short-pex", label: "Short PEX" },
+    { id: "short-12v", label: "Short 12v" },
     { id: "performance", label: "Performance Drop" },
     { id: "black-screen", label: "Black Screen" },
   ];
@@ -52,6 +60,7 @@ const TransactionUpdate = ({ setActiveButton, selectedTransactionId }) => {
     { value: "pending", label: "Pending" },
     { value: "in-progress", label: "In Progress" },
     { value: "completed", label: "Completed" },
+    { value: "waiting-parts", label: "Waiting Parts" },
     { value: "cancelled", label: "Cancelled" },
   ];
 
@@ -65,6 +74,7 @@ const TransactionUpdate = ({ setActiveButton, selectedTransactionId }) => {
     { value: "tech2", label: "Technician 2" },
     { value: "tech3", label: "Technician 3" },
   ];
+  
 
   useEffect(() => {
     const fetchTransaction = async () => {
@@ -500,7 +510,22 @@ const TransactionUpdate = ({ setActiveButton, selectedTransactionId }) => {
               selectedTransactionId={selectedTransactionId}
               setActiveButton={setActiveButton}
               setFormStep={setFormStep}
+              onTotalCostChange={handleTotalCostChange} // Add this prop
               data-hardware-component
+            />
+          </div>
+
+          {/* Add Form Step 4 */}
+          <div
+            className={`absolute top-0 w-full transition-all duration-500 transform ${
+              formStep === 4 ? "translate-x-0" : "translate-x-full"
+            }`}
+          >
+            <TransactionUpdatePage3
+              selectedTransactionId={selectedTransactionId}
+              setActiveButton={setActiveButton}
+              setFormStep={setFormStep}
+              totalAmount={totalCost} // Pass totalCost as totalAmount
             />
           </div>
         </div>
@@ -571,6 +596,26 @@ const TransactionUpdate = ({ setActiveButton, selectedTransactionId }) => {
             <button
               type="button"
               onClick={() => setFormStep(2)}
+              className="px-8 py-3 bg-slate-700 text-white rounded-xl
+                         hover:opacity-90 transition-all duration-300 shadow-lg transform hover:scale-105"
+            >
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormStep(4)} // Changed to move to payment step
+              className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl
+                         hover:opacity-90 transition-all duration-300 shadow-lg transform hover:scale-105"
+            >
+              Next: Payment
+            </button>
+          </>
+        )}
+        {formStep === 4 && (
+          <>
+            <button
+              type="button"
+              onClick={() => setFormStep(3)}
               className="px-8 py-3 bg-slate-700 text-white rounded-xl
                          hover:opacity-90 transition-all duration-300 shadow-lg transform hover:scale-105"
             >

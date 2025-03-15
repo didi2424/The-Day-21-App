@@ -1,6 +1,13 @@
+import { useEffect } from 'react';
 import Image from 'next/image';
 
 const DeviceImagePrint = ({ transaction }) => {
+  useEffect(() => {
+    if (transaction) {
+      document.title = `Transaction_${transaction._id}`;
+    }
+  }, [transaction]);
+
   const getAllImages = () => {
     if (!transaction) return [];
     const images = [];

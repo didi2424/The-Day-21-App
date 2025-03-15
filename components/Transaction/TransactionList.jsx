@@ -1,19 +1,18 @@
 import { useEffect, useState, useCallback } from "react";
 import { format } from "date-fns";
 import { toast } from "react-toastify";
-import { MdPersonSearch, MdOutlineTimelapse, MdClose } from "react-icons/md";
+import { MdPersonSearch, MdOutlineTimelapse, MdClose, MdFilterList } from "react-icons/md";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FaTrash } from "react-icons/fa";
 
 const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => {
-  // Add these props
   const router = useRouter();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(7);
+  const [pageSize] = useState(5);
   const [totalTransactions, setTotalTransactions] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -26,21 +25,35 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
 
+  // Add status filter options
+  const statusFilters = [
+    { label: 'All', value: '' },
+    { label: 'Pending', value: 'pending' },
+    { label: 'In Progress', value: 'in-progress' },
+    { label: 'Waiting Parts', value: 'waiting-parts' },
+    { label: 'Completed', value: 'completed' },
+    { label: 'Cancelled', value: 'cancelled' },
+  ];
+
+  // Add dropdown state
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+
+  const handleStatusFilter = (status) => {
+    setSearchTerm(status);
+    setCurrentPage(1);
+  };
+
   const formatPhoneNumber = (number) => {
     if (!number) return "";
-    // Hapus semua spasi dan karakter non-digit
     let cleanedNumber = number.replace(/\D/g, "");
-    // Jika nomor diawali dengan 0, ubah ke +62
     if (cleanedNumber.startsWith("0")) {
       cleanedNumber = "+62" + cleanedNumber.substring(1);
     } else if (!cleanedNumber.startsWith("+")) {
-      // Jika tidak ada kode negara, default ke +62
       cleanedNumber = "+62" + cleanedNumber;
     }
     return cleanedNumber;
   };
 
-  // Debounce search term
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -57,21 +70,29 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => {
 
       const data = await response.json();
 
-      // Fetch hardware data for each transaction
-      const transactionsWithHardware = await Promise.all(
+      console.log(data);
+
+      const transactionsWithDetails = await Promise.all(
         data.transactions.map(async (transaction) => {
-          const hardwareResponse = await fetch(
-            `/api/transaction/hardware/byService/${transaction._id}`
-          );
-          const hardwareData = await hardwareResponse.json();
+          const [hardwareResponse, paymentResponse] = await Promise.all([
+            fetch(`/api/transaction/hardware/byService/${transaction._id}`),
+            fetch(`/api/payment?transactionId=${transaction._id}`),
+          ]);
+
+          const [hardwareData, paymentData] = await Promise.all([
+            hardwareResponse.json(),
+            paymentResponse.json(),
+          ]);
+
           return {
             ...transaction,
             hardwareData,
+            payment: paymentData,
           };
         })
       );
 
-      setTransactions(transactionsWithHardware);
+      setTransactions(transactionsWithDetails);
       setTotalTransactions(data.totalTransactions);
       setTotalPages(Math.ceil(data.totalTransactions / pageSize));
     } catch (error) {
@@ -82,7 +103,6 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => {
     }
   }, [currentPage, pageSize]);
 
-  // Search function
   const searchTransactions = useCallback(async () => {
     if (!debouncedSearchTerm) {
       return fetchTransactions();
@@ -90,15 +110,42 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => {
 
     setIsSearching(true);
     try {
-      const response = await fetch(
-        `/api/transaction/search?term=${encodeURIComponent(
-          debouncedSearchTerm
-        )}&page=${currentPage}&pageSize=${pageSize}`
+      const statusKeywords = ['completed', 'pending', 'in-progress', 'waiting-parts', 'cancelled'];
+      const searchStatus = statusKeywords.find(status => 
+        debouncedSearchTerm.toLowerCase().includes(status)
       );
+
+      const response = await fetch(
+        `/api/transaction/search?term=${encodeURIComponent(debouncedSearchTerm)}${
+          searchStatus ? `&status=${searchStatus}` : ''
+        }&page=${currentPage}&pageSize=${pageSize}`
+      );
+      
       if (!response.ok) throw new Error("Search failed");
 
       const data = await response.json();
-      setTransactions(data.transactions);
+
+      const transactionsWithDetails = await Promise.all(
+        data.transactions.map(async (transaction) => {
+          const [hardwareResponse, paymentResponse] = await Promise.all([
+            fetch(`/api/transaction/hardware/byService/${transaction._id}`),
+            fetch(`/api/payment?transactionId=${transaction._id}`),
+          ]);
+
+          const [hardwareData, paymentData] = await Promise.all([
+            hardwareResponse.json(),
+            paymentResponse.json(),
+          ]);
+
+          return {
+            ...transaction,
+            hardwareData,
+            payment: paymentData,
+          };
+        })
+      );
+
+      setTransactions(transactionsWithDetails);
       setTotalTransactions(data.totalTransactions);
       setTotalPages(Math.ceil(data.totalTransactions / pageSize));
     } catch (error) {
@@ -129,7 +176,6 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => {
     currentPage > 1 && setCurrentPage((prev) => prev - 1);
 
   const handleViewDetails = (transactionId) => {
-    // Instead of navigating to a new route, update the parent state
     setSelectedTransactionId(transactionId);
     setActiveButton("Transaction Details");
   };
@@ -149,7 +195,6 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => {
         toast.success("Transaction deleted successfully");
         setShowDeleteModal(false);
         setTransactionToDelete(null);
-        // Refresh the transactions list
         fetchTransactions();
       } else {
         throw new Error("Failed to delete transaction");
@@ -170,11 +215,9 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => {
     if (imageData.startsWith("data:image")) {
       return imageData;
     }
-    // If it's not a base64 image, assume it's a URL
     return imageData;
   };
 
-  // Add this helper function for currency formatting
   const formatCurrency = (amount) => {
     return `Rp ${amount?.toLocaleString("id-ID")}`;
   };
@@ -192,34 +235,81 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => {
       </div>
       <div className=" mx-auto p-4">
         {/* Header Section */}
-        <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl border border-gray-700/50 p-6 mb-6 shadow-lg">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-              Transaction List
-            </h2>
-            <div className="relative w-full md:w-96">
-              <input
-                type="text"
-                placeholder="Search transactions..."
-                value={searchTerm}
-                onChange={handleSearch}
-                className="w-full px-4 py-2.5 rounded-lg bg-gray-800/50 border border-gray-700 text-gray-100 
-                  focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 
-                  focus:outline-none backdrop-blur-xl"
-              />
-              {searchTerm && (
-                <button
-                  onClick={handleClearSearch}
-                  className="absolute right-10 top-1/2 transform -translate-y-1/2 hover:bg-gray-100 p-1 rounded-full"
-                >
-                  <MdClose className="text-gray-500 text-xl hover:text-gray-700" />
-                </button>
-              )}
-              {isSearching ? (
-                <MdOutlineTimelapse className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
-              ) : (
-                <MdPersonSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
-              )}
+        <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl border border-gray-700/50 p-6 mb-6 shadow-lg relative z-50">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+                Transaction List
+              </h2>
+              <div className="flex gap-2 items-center">
+                {/* Status Filter Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+                    className="px-4 py-2.5 rounded-lg bg-gray-800/50 border border-gray-700 text-gray-100 
+                      hover:bg-gray-700/50 focus:outline-none flex items-center gap-2"
+                  >
+                    <MdFilterList className="text-xl" />
+                    <span>
+                      {statusFilters.find(f => f.value === searchTerm)?.label || 'Filter Status'}
+                    </span>
+                  </button>
+                  
+                  {showStatusDropdown && (
+                    <>
+                      <div 
+                        className="fixed inset-0 h-full w-full z-[60]"
+                        onClick={() => setShowStatusDropdown(false)}
+                      />
+                      <div className="absolute right-0 mt-2 py-2 w-48 bg-gray-800/90 backdrop-blur-xl 
+                        rounded-xl border border-gray-700/50 shadow-lg z-[70]">
+                        {statusFilters.map((filter) => (
+                          <button
+                            key={filter.value}
+                            onClick={() => {
+                              handleStatusFilter(filter.value);
+                              setShowStatusDropdown(false);
+                            }}
+                            className={`w-full px-4 py-2 text-left text-sm transition-colors
+                              ${searchTerm === filter.value
+                                ? 'bg-blue-500/20 text-blue-300'
+                                : 'text-gray-300 hover:bg-gray-700/50'
+                              }`}
+                          >
+                            {filter.label}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+                
+                {/* Search Input */}
+                <div className="relative w-full md:w-96">
+                  <input
+                    type="text"
+                    placeholder="Search transactions..."
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    className="w-full px-4 py-2.5 rounded-lg bg-gray-800/50 border border-gray-700 text-gray-100 
+                    focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 
+                    focus:outline-none backdrop-blur-xl"
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={handleClearSearch}
+                      className="absolute right-10 top-1/2 transform -translate-y-1/2 hover:bg-gray-100 p-1 rounded-full"
+                    >
+                      <MdClose className="text-gray-500 text-xl hover:text-gray-700" />
+                    </button>
+                  )}
+                  {isSearching ? (
+                    <MdOutlineTimelapse className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+                  ) : (
+                    <MdPersonSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -291,7 +381,7 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => {
                       </div>
 
                       {/* ButtonChat */}
-                      <div className="min-w-[180px]">
+                      <div className="min-w-[80px]">
                         <p className="text-xs text-gray-100">Message</p>
                         {transaction.customer?.wa_number && (
                           <a
@@ -302,7 +392,7 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => {
                             rel="noopener noreferrer"
                             className="text-sm text-green-400 hover:underline"
                           >
-                            Chat via WhatsApp
+                            Chat
                           </a>
                         )}
                       </div>
@@ -312,7 +402,7 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => {
                     <div className="flex-1 min-w-[200px]">
                       <div className="flex flex-wrap gap-1.5">
                         {transaction.selectedIssues
-                          ?.slice(0, 2)
+                          ?.slice(0, 3)
                           .map((issue, index) => (
                             <span
                               key={index}
@@ -341,6 +431,8 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => {
                             ? "bg-yellow-500/10 text-yellow-300 border border-yellow-500/50"
                             : transaction.status === "in-progress"
                             ? "bg-blue-500/10 text-blue-300 border border-blue-500/50"
+                            : transaction.status === "waiting-parts"
+                            ? "bg-orange-500/10 text-orange-300 border border-orange-500/50"
                             : transaction.status === "completed"
                             ? "bg-green-500/10 text-green-300 border border-green-500/50"
                             : "bg-red-500/10 text-red-300 border border-red-500/50"
@@ -357,16 +449,28 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => {
                     </div>
 
                     {/* Price Column */}
-                    <div className="w-32 text-center ">
-                      <p className="text-sm font-medium text-purple-400">
+                    <div className=" w-40 flex items-center justify-between gap-2 ">
+                      <div className="flex text-sm font-medium text-purple-400">
                         {formatCurrency(
                           transaction.hardwareData?.totalCost || 0
                         )}
-                      </p>
+                      </div>
+
+                      <div
+                        className={` flex w-20 text-center justify-center px-2 py-1 text-xs font-medium rounded-full ${
+                          transaction.payment?.status === "paid"
+                            ? "bg-green-500/10 text-green-300 border border-green-500/50"
+                            : transaction.payment?.status === "partial"
+                            ? "bg-yellow-500/10 text-yellow-300 border border-yellow-500/50"
+                            : "bg-red-500/10 text-red-300 border border-red-500/50"
+                        }`}
+                      >
+                        {transaction.payment?.status || "unpaid"}
+                      </div>
                     </div>
 
                     {/* Actions Column */}
-                    <div className="w-32 flex justify-end gap-2">
+                    <div className="w-36 flex justify-end gap-2">
                       <button
                         onClick={() => handleViewDetails(transaction._id)}
                         className="px-3 py-1.5 text-xs font-medium text-blue-300 bg-blue-500/10 

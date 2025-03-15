@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import ReactDOM from "react-dom";
 import Image from "next/image";
 import { MdFullscreen, MdClose } from "react-icons/md";
 import DeviceImageHardwareReplacement from "./DeviceImageHardwareReplacement";
@@ -140,63 +139,27 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
   };
 
   const handlePrint = (transaction) => {
-    const printTab = window.open("", "_blank");
-    if (!printTab) {
-      alert("Please allow popups for this website");
-      return;
-    }
-
     const printContent = document.getElementById("print-hardware")?.innerHTML;
     if (!printContent) return;
-
+  
     const html = `
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Hardware Images - ${transaction._id}</title>
+          <title>Transaction_${transaction._id}</title>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
           <style>
-            body { 
-              margin: 0;
-              background: white;
-            }
-            .print-container {
-              width: 210mm;
-              min-height: 297mm;
-              margin: 0 auto;
-              background: white;
-              padding: 20mm;
-            }
-            .print-grid {
-              display: grid;
-              grid-template-columns: repeat(2, 1fr);
-              gap: 10mm;
-            }
-            .print-grid img {
-              max-width: 100%;
-              height: auto;
-              max-height: 100mm;
-              object-fit: contain;
-            }
+            body { margin: 0; background: white; }
+            .print-container { width: 210mm; min-height: 297mm; margin: 0 auto; background: white; padding: 20mm; }
+            .print-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10mm; }
+            .print-grid img { max-width: 100%; height: auto; max-height: 100mm; object-fit: contain; }
             @media print {
-              @page {
-                size: A4;
-                margin: 0;
-              }
-              body {
-                margin: 0;
-              }
-              .print-container {
-                width: 210mm;
-                min-height: 297mm;
-                padding: 20mm;
-                margin: 0;
-              }
-              #print-button {
-                display: none;
-              }
+              @page { size: A4; margin: 0; }
+              body { margin: 0; }
+              .print-container { width: 210mm; min-height: 297mm; padding: 20mm; margin: 0; }
+              #print-button { display: none; }
             }
           </style>
         </head>
@@ -213,6 +176,7 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
           </div>
           <script>
             window.onload = () => {
+              document.title = "Transaction ${transaction?.serviceNumber} - ${transaction.customer?.constumer_name} ${transaction.deviceModel}"; 
               const images = document.getElementsByTagName('img');
               let loadedImages = 0;
               for(let img of images) {
@@ -222,9 +186,7 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
                   img.addEventListener('load', () => {
                     loadedImages++;
                     if(loadedImages === images.length) {
-                      // All images loaded
                       document.fonts.ready.then(() => {
-                        // Fonts loaded too
                         if(!window.chrome) window.print();
                       });
                     }
@@ -242,12 +204,27 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
         </body>
       </html>
     `;
-
-    printTab.document.open();
-    printTab.document.write(html);
-    printTab.document.close();
+  
+    // Buat Blob dari HTML agar bisa dibuka sebagai file baru
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+  
+    // Buka tab baru dengan URL Blob
+    const printTab = window.open(url, "_blank");
+  
+    if (printTab) {
+      // Tunggu sampai tab baru selesai dimuat
+      printTab.onload = () => {
+        printTab.document.title = `Transaction_${transaction._id}`;
+        printTab.print();
+  
+        // Hapus URL Blob setelah dipakai
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      };
+    } else {
+      alert("Popup diblokir! Izinkan pop-up untuk mencetak dokumen.");
+    }
   };
-
   return (
     <div className="h-[540px]">
       <div className=" p-6 rounded-lg  ">
@@ -305,14 +282,14 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
                 </div>
               </div>
             )}
-       
-          <button
-            onClick={() => handlePrint(transaction)}
-            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl
+
+            <button
+              onClick={() => handlePrint(transaction)}
+              className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl
                          hover:opacity-90 transition-all duration-300 shadow-lg"
-          >
-            Print Device
-          </button>
+            >
+              Print Device
+            </button>
           </div>
 
           {/* Hardware Replacement Images Section */}
@@ -325,7 +302,6 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
             </div>
           </div>
         </div>
-   
       </div>
 
       {/* Hidden Print Template */}

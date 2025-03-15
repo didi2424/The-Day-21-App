@@ -73,12 +73,9 @@ function Page() {
         return `${basePath} > ${activeButton.charAt(0).toUpperCase() + activeButton.slice(1)}`; // Capitalize the active button name
     };
 
-
-
-
     return (
         <Provider>
-            <div className="h-screen flex flex-col w-full">
+            <div className="h-screen flex flex-col w-full bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900">
                 {/* Navbar */}
                 <header className="p-4">
 
@@ -87,7 +84,7 @@ function Page() {
                 </header>
 
                 <div className='justify-between flex pr-4 pl-4'>
-                <div className="text-sm">
+                <div className="text-sm text-cyan-500">
                         {getBreadcrumb()}
                     </div>
 
@@ -105,7 +102,7 @@ function Page() {
                     />
 
                     {/* Main Content Section */}
-                    <div className="flex-1 p-8 overflow-auto rounded-[20px] border border-gray-500 m-3 bg-[#fefdfb]">
+                    <div className="flex-1 p-8 overflow-auto rounded-[20px] border border-gray-500 m-3 ">
                         <DashboardContent activeButton={activeButton} />
                     </div>
                 </div>

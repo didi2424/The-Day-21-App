@@ -38,59 +38,16 @@ export async function POST(request) {
   }
 }
 
-export async function GET(request) {
+export async function GET() {
   try {
     await connectToDB();
-    const { searchParams } = new URL(request.url);
-    const serviceId = searchParams.get('serviceId');
-
-    console.log('Received serviceId:', serviceId);
-
-    if (!serviceId) {
-      return NextResponse.json(
-        { error: 'Service ID is required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate MongoDB ObjectId
-    if (!mongoose.Types.ObjectId.isValid(serviceId)) {
-      console.log('Invalid MongoDB ObjectId');
-      return NextResponse.json(
-        { error: 'Invalid Service ID format' },
-        { status: 400 }
-      );
-    }
-
-    const query = { serviceId: new mongoose.Types.ObjectId(serviceId) };
-    console.log('Query:', query);
-
-    const transactions = await HardwareTransaction.find(query)
-      .populate({
-        path: 'serviceId',
-        model: 'Service'
-      })
-      .populate({
-        path: 'replacedHardware.inventoryId',
-        model: 'Inventory'
-      })
-      .sort({ createdAt: -1 });
-
-    console.log('Found transactions:', JSON.stringify(transactions, null, 2));
-
-    // Return empty array if no transactions found
-    if (!transactions || transactions.length === 0) {
-      return NextResponse.json([]);
-    }
-
-    return NextResponse.json(transactions);
+    const hardwareTransactions = await HardwareTransaction.find({}).populate('serviceId');
+    console.log('Found hardware transactions:', hardwareTransactions); // Debug log
+    return NextResponse.json(hardwareTransactions);
   } catch (error) {
-    console.error('Detailed error in GET:', error);
+    console.error('Error fetching hardware:', error);
     return NextResponse.json(
-      { 
-        error: error.message || 'Failed to fetch hardware transactions',
-        details: error.stack
-      },
+      { message: "Failed to fetch hardware transactions", error: error.message },
       { status: 500 }
     );
   }

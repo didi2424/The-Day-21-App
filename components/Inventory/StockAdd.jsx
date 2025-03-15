@@ -167,8 +167,8 @@ const StockAdd = () => {
 
       <div className="flex flex-1 gap-6">
         {/* left menu */}
-        <div className=" p-4 rounded-md  mt-4 w-[60%]">
-          <div className="text-xl font-bold">General Information</div>
+        <div className=" p-4 rounded-md  w-[60%]">
+
           {/* col 1 */}
           <div className="flex flex-col gap-2">
             <div className="font-sm font-medium mt-2">Product Name</div>
@@ -219,9 +219,6 @@ const StockAdd = () => {
                 <option className="text-sm" value="Monolithic Power Systems">
                   Monolithic Power Systems
                 </option>
-                <option className="text-sm" value="Monolithic Power Systems">
-                  Monolithic Power Systems
-                </option>
                 <option className="text-sm" value="Magnachip">
                   Magnachip
                 </option>
@@ -230,6 +227,13 @@ const StockAdd = () => {
                 </option>
                 <option className="text-sm" value="ARCTIC">
                   ARCTIC
+                </option>
+                <option className="text-sm" value="Gstek">
+                  Gstek
+                </option>
+                <option className="text-sm" value="SinoPower">
+                  SinoPower
+                
                 </option>
               </select>
             </div>

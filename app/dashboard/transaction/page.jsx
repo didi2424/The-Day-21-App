@@ -10,6 +10,32 @@ import TransactionList from "../../../components/Transaction/TransactionList";
 import TransactionDetail from "../../../components/Transaction/TransactionDetail/TransactionDetail";
 import TransactionUpdate from "../../../components/Transaction/TransactionEdit/TransactionUpdate";
 
+const useCountAnimation = (endValue, duration = 1000) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTime;
+    const startValue = 0;
+
+    const animate = (currentTime) => {
+      if (!startTime) startTime = currentTime;
+      const progress = (currentTime - startTime) / duration;
+
+      if (progress < 1) {
+        const currentCount = Math.floor(startValue + (endValue - startValue) * progress);
+        setCount(currentCount);
+        requestAnimationFrame(animate);
+      } else {
+        setCount(endValue);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [endValue, duration]);
+
+  return count;
+};
+
 const DashboardTransactionContent = ({
   activeButton,
   selectedTransactionId,
@@ -17,10 +43,74 @@ const DashboardTransactionContent = ({
   setSelectedTransactionId,
 }) => {
   const { data: session } = useSession();
+  const [totalCost, setTotalCost] = useState(0);
+  const [paidTransactions, setPaidTransactions] = useState([]);
+  const [unpaidTotal, setPaidTotal] = useState(0);
+  const [totalPaid, setTotalPaid] = useState(0);
+
+  const animatedTotal = useCountAnimation(totalCost);
+  const animatedPaid = useCountAnimation(totalPaid);
+  const animatedUnpaid = useCountAnimation(unpaidTotal);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch transactions with consistent parameter naming
+        const transactionResponse = await fetch('/api/transaction/hardware');
+        const transactionData = await transactionResponse.json();
+        
+        const transactions = Array.isArray(transactionData) ? transactionData : [transactionData];
+        
+        // Update payment fetch to use consistent parameter
+        const paymentsResponse = await fetch('/api/payment');
+        const paymentsData = await paymentsResponse.json();
+
+        // Update serviceId references to be consistent
+        const paidServiceIds = paymentsData.map(payment => payment.transaction._id);
+        const paidTransactions = transactions.filter(transaction => 
+          paidServiceIds.includes(transaction.serviceId)
+        );
+
+        // Calculate totals
+        const grandTotal = transactions.reduce((sum, transaction) => 
+          sum + (transaction.totalCost || 0), 0
+        );
+        const paidAmount = paidTransactions.reduce((sum, transaction) => 
+          sum + (transaction.totalCost || 0), 0
+        );
+
+        setTotalCost(grandTotal);
+        setPaidTransactions(paidTransactions);
+        setTotalPaid(paidAmount);
+        setPaidTotal(grandTotal - paidAmount);
+
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    if (!activeButton) {
+      fetchData();
+    }
+  }, [activeButton]);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const view = searchParams.get("view");
+    const id = searchParams.get("id"); // Use 'id' consistently
+
+    if (view === "transaction") {
+      setActiveButton("transaction");
+    } else if (id) {
+      setActiveButton("Transaction Details");
+      setSelectedTransactionId(id);
+    }
+  }, []);
 
   switch (activeButton) {
     case "transaction":
       return (
+        
         <TransactionList
           setActiveButton={setActiveButton}
           setSelectedTransactionId={setSelectedTransactionId}
@@ -73,12 +163,67 @@ const DashboardTransactionContent = ({
         <Provider>
           {session?.user ? (
             <>
-              <h1 className="text-3xl font-bold">
-                Welcome {session?.user.name}
-              </h1>
-              <p className="mt-4">
-                Welcome to your transaction. Choose a menu item to get started.
-              </p>
+              <div className="mb-8">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                  Welcome {session?.user.name}
+                </h1>
+                <p className="mt-2 text-gray-400">
+                  Welcome to your transaction dashboard. Here's your overview:
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-gradient-to-br from-purple-900/50 to-purple-800/30 rounded-xl p-6 shadow-lg border border-purple-500/20">
+                  <h2 className="text-lg font-semibold text-purple-300 mb-4">Transaction Overview</h2>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">Total Transactions</span>
+                      <span className="text-2xl font-bold text-white">{paidTransactions.length}</span>
+                    </div>
+                    <div className="h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">Bruto</span>
+                      <span className="text-2xl font-bold text-white">
+                        Rp {animatedTotal.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-cyan-900/50 to-cyan-800/30 rounded-xl p-6 shadow-lg border border-cyan-500/20">
+                  <h2 className="text-lg font-semibold text-cyan-300 mb-4">Payment Status</h2>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">Total Paid</span>
+                      <span className="text-2xl font-bold text-green-400">
+                        Rp {animatedPaid.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">Unpaid Amount</span>
+                      <span className="text-2xl font-bold text-red-400">
+                        Rp {animatedUnpaid.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 bg-slate-800/50 rounded-xl p-6 border border-slate-700/50">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-300">Payment Progress</h2>
+                  <span className="text-sm text-gray-400">
+                    {Math.round((totalPaid / totalCost) * 100)}% Complete
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-purple-500 to-cyan-500 transition-all duration-500"
+                    style={{ width: `${(totalPaid / totalCost) * 100}%` }}
+                  />
+                </div>
+              </div>
             </>
           ) : (
             <h1>Login</h1>
@@ -88,6 +233,7 @@ const DashboardTransactionContent = ({
   }
 };
 
+// Update URL parameter handling in payments function
 function payments() {
   const [activeButton, setActiveButton] = useState(null);
   const [selectedTransactionId, setSelectedTransactionId] = useState(null);
@@ -96,13 +242,13 @@ function payments() {
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const view = searchParams.get("view");
-    const transactionId = searchParams.get("id");
+    const id = searchParams.get("id"); // Changed from 'serviceId' to 'id'
 
     if (view === "transaction") {
       setActiveButton("transaction");
-    } else if (transactionId) {
+    } else if (id) { // Updated condition
       setActiveButton("Transaction Details");
-      setSelectedTransactionId(transactionId);
+      setSelectedTransactionId(id); // Using consistent naming
     }
   }, []);
 

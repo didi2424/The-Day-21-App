@@ -60,7 +60,7 @@ const TotalService = ({ transaction, currentStep, setCurrentStep }) => {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Service Invoice - ${transaction?.serviceNumber || ''}</title>
+          <title>Service Invoice - ${transaction?.serviceNumber || ''} - ${transaction.customer?.constumer_name} ${transaction.deviceModel}</title>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
@@ -228,7 +228,8 @@ const TotalService = ({ transaction, currentStep, setCurrentStep }) => {
             <div className="mb-6">
               <button
                 onClick={handlePrint}
-                className="px-4 py-2 mt-6 bg-[#b9ec8f] text-black rounded-md hover:bg-[#a5d880] flex items-center gap-2"
+                className="flex gap-2 items-center px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl
+                         hover:opacity-90 transition-all duration-300 shadow-lg"
               >
                 <MdPrint />
                 Print Invoice
