@@ -75,7 +75,7 @@ function inventory() {
                     <NavbarAdmin />
 
                 </header>
-                <div className='justify-between flex pr-4 pl-4 text-cyan-400'>
+                <div className='justify-between flex pr-4 pl-4 py-2 text-cyan-400'>
                 <div className="text-sm ">
                         {getBreadcrumb()}
                     </div>

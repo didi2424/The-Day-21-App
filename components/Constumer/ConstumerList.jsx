@@ -3,7 +3,7 @@ import { format } from "date-fns"; // Import format for date formatting
 import { toast } from "react-toastify";
 import EditModal from "./EditModal"; // Import modal
 import "react-toastify/dist/ReactToastify.css";
-
+import AddressPrint from "./AddressPrint";
 import { MdPersonSearch, MdOutlineTimelapse, MdClose } from "react-icons/md";
 
 const CustomerList = () => {
@@ -11,7 +11,7 @@ const CustomerList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1); // Page number
-  const [pageSize] = useState(7); // Number of customers per page
+  const [pageSize] = useState(6); // Number of customers per page
   const [totalCustomers, setTotalCustomers] = useState(0); // Total customer count
   const [totalPages, setTotalPages] = useState(1); // Total number of pages
 
@@ -25,7 +25,24 @@ const CustomerList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [transaction, setTransaction] = useState(null);
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR'
+    }).format(amount);
+  };
+
+
+  const formatWarranty = (months) => {
+    return `${months} Month${months > 1 ? 's' : ''}`;
+  };
+
+  const calculateItemTotal = (item) => {
+    const subtotal = item.price * item.quantity;
+    return subtotal - (subtotal * (item.discount || 0) / 100);
+  };
   const handleDelete = async (customer) => {
     const hasConfirmed = confirm(
       "Are you sure you want to delete this customer?"
@@ -137,7 +154,6 @@ const CustomerList = () => {
   const searchCustomers = useCallback(async () => {
     if (!debouncedSearchTerm) {
       return fetchCustomers();
-      
     }
 
     setIsSearching(true);
@@ -191,8 +207,43 @@ const CustomerList = () => {
     setActiveTooltipId((prevId) => (prevId === customerId ? null : customerId));
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return isNaN(date) ? "Invalid date" : format(date, "MM/dd HH:mm");
+  };
+
   if (loading) return <p>Loading customers...</p>;
   if (error) return <p>Error: {error}</p>;
+  const handlePrint = (customer) => {
+    const printWindow = window.open("", "_blank");
+    const printContent = document.getElementById(`print-address-${customer._id}`);
+
+    if (!printWindow || !printContent) return;
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Service Address - ${customer.constumer_name}</title>
+          <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        </head>
+        <body class="bg-white">
+          <div class="max-w-4xl mx-auto p-8">
+            ${printContent.innerHTML}
+          </div>
+          <script>
+            window.onload = () => {
+              window.print();
+              window.onafterprint = () => window.close();
+            }
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
 
   return (
     <div>
@@ -300,16 +351,18 @@ const CustomerList = () => {
                     <div className="flex-1 flex justify-center flex-col">
                       <p className="font-satoshi text-xs text-gray-300">
                         Created At:{" "}
-                        {format(new Date(customer.createdAt), "MM/dd HH:mm")}
+                        {formatDate(customer.createdAt)}
                       </p>
                       <p className="font-satoshi text-xs text-gray-300">
                         Updated At:{" "}
-                        {format(new Date(customer.updatedAt), "MM/dd HH:mm")}
+                        {formatDate(customer.updatedAt)}
                       </p>
                     </div>
 
                     <div className="flex-1 flex justify-center flex-col">
-                      <p className="font-satoshi text-xs text-gray-300">Status</p>
+                      <p className="font-satoshi text-xs text-gray-300">
+                        Status
+                      </p>
                       <p
                         className={`font-satoshi text-xs ${
                           customer.status?.toLowerCase() === "active"
@@ -336,7 +389,18 @@ const CustomerList = () => {
                       >
                         <MdClose className="w-4 h-4" />
                       </button>
+                      <button
+                        onClick={() => handlePrint(customer)}
+                        className="px-3 py-1.5 text-xs font-medium text-blue-300 bg-blue-500/10 
+                          rounded border border-blue-500/50 hover:bg-blue-500/20 transition-colors"
+                      >
+                        Print
+                      </button>
                     </div>
+                  </div>
+                  {/* Hidden Print Template */}
+                  <div id={`print-address-${customer._id}`} className="hidden">
+                    <AddressPrint customer={customer} />
                   </div>
                 </li>
               ))
@@ -379,6 +443,16 @@ const CustomerList = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Hidden Print Template */}
+      <div id="print-address" className="hidden">
+        <AddressPrint
+          transaction={transaction}
+          formatCurrency={formatCurrency}
+          formatWarranty={formatWarranty}
+          calculateItemTotal={calculateItemTotal}
+        />
       </div>
 
       {isModalOpen && (

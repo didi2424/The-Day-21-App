@@ -100,7 +100,6 @@ const DeviceImageHardwareReplacement = ({ transactionId }) => {
       try {
         const response = await fetch(`/api/transaction/images/replacehardware?transactionId=${transactionId}`);
         const data = await response.json();
-        console.log('Fetched images:', data); // Debug log
         setImages(data);
       } catch (error) {
         console.error('Error fetching image:', error);

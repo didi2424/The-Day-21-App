@@ -10,10 +10,8 @@ import 'react-toastify/dist/ReactToastify.css';
 const RootLayout = ({ children }) => {
   return (
     <html lang="en">
-      
       <body>
-      
-          <main className="app bg-[#efefef] ">
+          <main className=" app">
             {children}
           </main>
           <ToastContainer  />

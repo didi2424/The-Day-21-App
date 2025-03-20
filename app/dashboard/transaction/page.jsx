@@ -263,7 +263,7 @@ function payments() {
   return (
     <Provider>
       <div className="h-screen flex flex-col w-full bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900">
-        <header className="p-4 bg-black/30 backdrop-blur-lg border-b border-purple-500/20">
+        <header className="p-4 ">
           <NavbarAdmin />
         </header>
         <div className="justify-between flex pr-4 pl-4 py-2 text-cyan-400">

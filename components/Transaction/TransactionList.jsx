@@ -70,8 +70,6 @@ const TransactionList = ({ setActiveButton, setSelectedTransactionId }) => {
 
       const data = await response.json();
 
-      console.log(data);
-
       const transactionsWithDetails = await Promise.all(
         data.transactions.map(async (transaction) => {
           const [hardwareResponse, paymentResponse] = await Promise.all([

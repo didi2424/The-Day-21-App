@@ -133,11 +133,6 @@ const DeviceImage = ({ transaction, setCurrentStep }) => {
     });
   };
 
-  const handleNextClick = () => {
-    console.log("Next button clicked, changing to step 3");
-    setCurrentStep(3);
-  };
-
   const handlePrint = (transaction) => {
     const printContent = document.getElementById("print-hardware")?.innerHTML;
     if (!printContent) return;
