@@ -1,6 +1,5 @@
 import { connectToDB } from "@utils/database";
 import HardwareTransaction from "@models/hardwareTransaction";
-import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {

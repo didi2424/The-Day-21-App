@@ -9,6 +9,7 @@ export const GET = async (request, { params }) => {
     const images = await TransactionImage.find({ transactionId: id });
     return new Response(JSON.stringify(images), { status: 200 });
   } catch (error) {
+    console.error('Error fetching transaction images:', error);
     return new Response("Failed to fetch images", { status: 500 });
   }
 };
@@ -19,6 +20,7 @@ export const DELETE = async (request, { params }) => {
     await TransactionImage.findByIdAndDelete(params.id);
     return new Response("Image deleted", { status: 200 });
   } catch (error) {
+    console.error('Error deleting transaction image:', error);
     return new Response("Failed to delete image", { status: 500 });
   }
 };

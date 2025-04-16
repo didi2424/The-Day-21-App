@@ -52,6 +52,7 @@ export async function GET(req) {
     });
     return NextResponse.json(payments);
   } catch (error) {
+    console.error('Payment retrieval error:', error);
     return NextResponse.json(
       { message: "Failed to fetch payments" },
       { status: 500 }

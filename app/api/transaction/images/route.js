@@ -11,6 +11,7 @@ export const GET = async (request) => {
     const images = await TransactionImage.find({ transactionId });
     return new Response(JSON.stringify(images), { status: 200 });
   } catch (error) {
+    console.error('Error fetching transaction images:', error);
     return new Response("Failed to fetch images", { status: 500 });
   }
 };

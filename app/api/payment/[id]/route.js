@@ -14,6 +14,7 @@ export async function GET(req, { params }) {
     }
     return NextResponse.json(payment);
   } catch (error) {
+    console.error('Payment retrieval error:', error);
     return NextResponse.json(
       { message: "Failed to fetch payment" },
       { status: 500 }
@@ -34,6 +35,7 @@ export async function PUT(req, { params }) {
     }
     return NextResponse.json(payment);
   } catch (error) {
+    console.error('Payment update error:', error);
     return NextResponse.json(
       { message: "Failed to update payment" },
       { status: 500 }
@@ -53,6 +55,7 @@ export async function DELETE(req, { params }) {
     }
     return NextResponse.json({ message: "Payment deleted successfully" });
   } catch (error) {
+    console.error('Payment deletion error:', error);
     return NextResponse.json(
       { message: "Failed to delete payment" },
       { status: 500 }

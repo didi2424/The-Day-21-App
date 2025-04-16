@@ -2,7 +2,6 @@
 
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import TransactionDetail from '@/components/TransactionDetail/TransactionDetail';
 import NavbarAdmin from '@/components/NavBar/NavbarAdmin';
 import Provider from "@/components/Provider";
 import { MdArrowBack } from "react-icons/md";

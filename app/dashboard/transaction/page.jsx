@@ -47,6 +47,7 @@ const DashboardTransactionContent = ({
   const [paidTransactions, setPaidTransactions] = useState([]);
   const [unpaidTotal, setPaidTotal] = useState(0);
   const [totalPaid, setTotalPaid] = useState(0);
+  const [totaltransaction, setTotalTransaction] = useState(0);
 
   const animatedTotal = useCountAnimation(totalCost);
   const animatedPaid = useCountAnimation(totalPaid);
@@ -58,6 +59,11 @@ const DashboardTransactionContent = ({
         // Fetch transactions with consistent parameter naming
         const transactionResponse = await fetch('/api/transaction/hardware');
         const transactionData = await transactionResponse.json();
+
+        console.log(transactionData); // Debugging line to check the fetched data
+        setTotalTransaction(transactionData.length); // Update total transaction count
+
+
         
         const transactions = Array.isArray(transactionData) ? transactionData : [transactionData];
         
@@ -65,8 +71,11 @@ const DashboardTransactionContent = ({
         const paymentsResponse = await fetch('/api/payment');
         const paymentsData = await paymentsResponse.json();
 
+        // Ensure paymentsData is an array
+        const payments = Array.isArray(paymentsData) ? paymentsData : [];
+        
         // Update serviceId references to be consistent
-        const paidServiceIds = paymentsData.map(payment => payment.transaction._id);
+        const paidServiceIds = payments.map(payment => payment.transaction?._id).filter(Boolean);
         const paidTransactions = transactions.filter(transaction => 
           paidServiceIds.includes(transaction.serviceId)
         );
@@ -80,7 +89,7 @@ const DashboardTransactionContent = ({
         );
 
         setTotalCost(grandTotal);
-        setPaidTransactions(paidTransactions);
+        setPaidTransactions(paidTransactions.length);
         setTotalPaid(paidAmount);
         setPaidTotal(grandTotal - paidAmount);
 
@@ -178,7 +187,7 @@ const DashboardTransactionContent = ({
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-400">Total Transactions</span>
-                      <span className="text-2xl font-bold text-white">{paidTransactions.length}</span>
+                      <span className="text-2xl font-bold text-white">{totaltransaction}</span>
                     </div>
                     <div className="h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
                     <div className="flex justify-between items-center">

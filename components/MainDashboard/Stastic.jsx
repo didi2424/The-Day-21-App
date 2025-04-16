@@ -41,6 +41,11 @@ const Statistics = () => {
   const [totalCost, setTotalCost] = useState(0);
   const [totalPaid, setTotalPaid] = useState(0);
   const [paidTotal, setPaidTotal] = useState(0);
+  const [inventoryData, setInventoryData] = useState({
+    totalValue: 0,
+    totalItems: 0,
+    formattedValue: "Rp 0"
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -142,6 +147,12 @@ const Statistics = () => {
         setTotalCost(grandTotal);
         setTotalPaid(paidAmount);
         setPaidTotal(grandTotal - paidAmount);
+
+        // Add this to your existing fetch calls
+        const inventoryResponse = await fetch("/api/inventory/countall");
+        const inventoryData = await inventoryResponse.json();
+        setInventoryData(inventoryData);
+
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -306,16 +317,15 @@ const Statistics = () => {
   };
 
   const donutOptions = {
-    responsive: true,
-    cutout: "70%",
+    responsive: false,
+    cutout: "80%",
     plugins: {
       legend: {
-        position: "bottom",
-
+        position: "right",
         labels: {
           color: "#9CA3AF",
           usePointStyle: true,
-          padding: 10,
+          padding: 10 ,
         },
       },
     },
@@ -340,9 +350,7 @@ const Statistics = () => {
               <Doughnut data={paymentDonutData} options={donutOptions} />
             </div>
 
-          <div className="text-white text-sm mt-2 text-right">
-            Paid: Rp {totalPaid.toLocaleString()}
-          </div>
+     
         </div>
         <div className=" h-1/3 min-h-[220px] flex flex-col bg-white/1 backdrop-blur-lg border border-white/20 p-6 rounded-2xl shadow-lg">
           <h3 className="text-white text-lg font-semibold mb-4">
@@ -362,10 +370,11 @@ const Statistics = () => {
             <p className="text-gray-400 text-6xl font-bold">{customerCount}</p>
           </div>
         </div>
-        <div className=" h-1/3 min-h-[220px] flex flex-col bg-white/1 backdrop-blur-lg border border-white/20 p-6 rounded-2xl shadow-lg">
-          <h3 className="text-white text-lg font-semibold mb-4">Box 4</h3>
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-gray-400">Statistics 4</p>
+        <div className="h-1/3 min-h-[220px] flex flex-col bg-white/1 backdrop-blur-lg border border-white/20 p-6 rounded-2xl shadow-lg">
+          <h3 className="text-white text-lg font-semibold mb-4">Inventory</h3>
+          <div className="flex-1 flex flex-col items-center justify-center">
+            <p className="text-gray-400 text-4xl font-bold">{inventoryData.formattedValue}</p>
+            <p className="text-gray-500 text-sm mt-2">Total Items: {inventoryData.totalItems}</p>
           </div>
         </div>
       </div>

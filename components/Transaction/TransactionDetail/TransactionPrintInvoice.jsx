@@ -122,7 +122,7 @@ const TransactionPrintInvoice = ({ hardware, transaction, formatCurrency, format
           dikirim. Namun, segala risiko selama pengiriman berada di luar kendali
           kami. 🚚
         </p>
-        <p>📝 * Harap simpan invoice ini untuk klaim garansi.</p>
+        <p>📝 * Harap simpan invoice ini untuk klaim garansi. Perlu diketahui, cakupan garansi tidak mencakup kerusakan pada komponen lain di luar yang tertera.</p>
       </div>
 
             {/* Footer */}

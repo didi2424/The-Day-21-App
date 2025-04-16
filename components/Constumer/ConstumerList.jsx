@@ -99,13 +99,6 @@ const CustomerList = () => {
       }
       const data = await response.json();
 
-      // Log untuk debugging
-      console.log("Fetch Response:", {
-        currentPage,
-        totalItems: data.totalCustomers,
-        itemsReceived: data.customers.length,
-        calculatedPages: Math.ceil(data.totalCustomers / pageSize),
-      });
 
       setCustomers(data.customers);
       setTotalCustomers(data.totalCustomers);
@@ -166,16 +159,6 @@ const CustomerList = () => {
       if (!response.ok) throw new Error("Search failed");
 
       const data = await response.json();
-
-      // Log untuk debugging
-      console.log("Search Response:", {
-        searchTerm: debouncedSearchTerm,
-        currentPage,
-        totalItems: data.totalCustomers,
-        itemsReceived: data.customers.length,
-        calculatedPages: Math.ceil(data.totalCustomers / pageSize),
-      });
-
       setCustomers(data.customers);
       setTotalCustomers(data.totalCustomers);
       setTotalPages(Math.ceil(data.totalCustomers / pageSize));
