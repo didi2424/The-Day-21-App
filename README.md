@@ -1,38 +1,62 @@
+# 🚀 Project Setup Guide
 
+![Alt text](Image\a.png)
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## 🟢 1. Install Node.js
 
-## Getting Started
+Unduh dan install Node.js dari situs resmi:
 
-First, run the development server:
+🔗 [https://nodejs.org/en/download](https://nodejs.org/en/download)  
+Pilih installer Windows `.msi` dan ikuti petunjuk pemasangan.
+
+---
+
+## 📦 2. Install Dependencies
+
+Buka terminal di direktori project, lalu jalankan:
+
+```bash
+npm install
+```
+
+---
+
+## 🛠️ 3. Jalankan Mode Development
+
+Untuk memulai server development:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Setelah itu, buka browser dan akses:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+👉 [http://localhost:3000](http://localhost:3000)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🗄️ Build in Docker  (Optional)
 
-## Learn More
+```bash
+docker-compose up --build
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 🗄️ Docker : Restore MongoDB Database (Optional )
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Jika kamu ingin merestore data MongoDB ke container Docker, ikuti langkah-langkah berikut:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 📁 1. Salin Folder Backup ke Container
 
-## Deploy on Vercel
+> Ganti path sesuai lokasi backup di komputermu (`E:\mongo-backup\mydatabase`)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+docker cp "E:\mongo-backup\mydatabase" the-day-21-app-mongo-1:/backup
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### ♻️ 2. Jalankan Perintah Restore
+
+```bash
+docker exec -it the-day-21-app-mongo-1 mongorestore --username admin --password password --authenticationDatabase admin --drop --db mydatabase /backup/mydatabase
+```
+> Pastikan username dan password sesuai dengan konfigurasi MongoDB di dalam container.
+---
+
+📌 **Catatan:** Pastikan container MongoDB (`the-day-21-app-mongo-1`) sedang berjalan sebelum melakukan restore.
