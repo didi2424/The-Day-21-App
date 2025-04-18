@@ -1,6 +1,6 @@
 # 🚀 Project Setup Guide
 
-![Alt text](Image\a.png)
+![Alt text](./Image/a.png)
 
 ## 🟢 1. Install Node.js
 
