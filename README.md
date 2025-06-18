@@ -35,6 +35,13 @@ Setelah itu, buka browser dan akses:
 
 ## 🗄️ Build in Docker  (Optional)
 
+## 🟢  Install Docker Desktop
+Unduh dan install Node.js dari situs resmi:
+
+🔗 [https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)  
+Pilih installer Windows `.exe` dan ikuti petunjuk pemasangan.
+
+kemudian buka di terminal visual studio dan jalankan perintah berikut
 ```bash
 docker-compose up --build
 ```

@@ -47,6 +47,12 @@ const TransactionUpdate = ({ setActiveButton, selectedTransactionId }) => {
     { id: "short-12v", label: "Short 12v" },
     { id: "performance", label: "Performance Drop" },
     { id: "black-screen", label: "Black Screen" },
+    { id: "missing-1.8v", label: "Missing 1.8v" },
+    { id: "missing-Pex", label: "Missing Pex" },
+    { id: "missing-3v3", label: "Missing 3v3" },
+    { id: "error-43", label: "Error 43" },
+    { id: "missing-NVDD", label: "Missing NVDD" },
+    { id: "deadcore", label: "DeadCore" },
   ];
 
   const accessoryOptions = [
