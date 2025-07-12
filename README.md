@@ -58,7 +58,7 @@ Jika kamu ingin merestore data MongoDB ke container Docker, ikuti langkah-langka
 docker cp "E:\mongo-backup\mydatabase" the-day-21-app-mongo-1:/backup
 ```
 
-### ♻️ 2. Jalankan Perintah Restore
+### ♻️ 2.  Perintah Restore
 
 ```bash
 docker exec -it the-day-21-app-mongo-1 mongorestore --username admin --password password --authenticationDatabase admin --drop --db mydatabase /backup/mydatabase
