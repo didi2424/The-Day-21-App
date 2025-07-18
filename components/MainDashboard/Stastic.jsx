@@ -331,13 +331,36 @@ const Statistics = () => {
     },
   };
 
+  // Add this new function after the other process functions
+  const getWeeklyStats = () => {
+    const today = new Date();
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const stats = days.map(day => ({
+      day,
+      count: 0,
+      amount: 0
+    }));
+
+    payments.forEach(payment => {
+      const paymentDate = new Date(payment.paymentDate);
+      // Only count payments from the current week
+      if (today.getTime() - paymentDate.getTime() <= 7 * 24 * 60 * 60 * 1000) {
+        const dayIndex = paymentDate.getDay();
+        stats[dayIndex].count++;
+        stats[dayIndex].amount += payment.amount;
+      }
+    });
+
+    return stats;
+  };
+
   return (
-    <div className="w-full">
+    <div className="h-[540px]">
       <div className="fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-800/20 to-pink-900/20" />
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-500/20 rounded-full mix-blend-multiply filter blur-[128px]"></div>
-        <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-purple-500/20 rounded-full mix-blend-multiply filter blur-[128px]"></div>
-        <div className="absolute bottom-1/4 left-1/3 w-[700px] h-[700px] bg-pink-500/20 rounded-full mix-blend-multiply filter blur-[128px]"></div>
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[540px] bg-blue-500/20 rounded-full mix-blend-multiply filter blur-[128px]"></div>
+        <div className="absolute top-1/3 right-1/4 w-[600px] h-[540px] bg-purple-500/20 rounded-full mix-blend-multiply filter blur-[128px]"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-[700px] h-[540px] bg-pink-500/20 rounded-full mix-blend-multiply filter blur-[128px]"></div>
       </div>
       <h2 className="text-2xl font-bold text-white mb-4">Statistics</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 ">
@@ -380,8 +403,8 @@ const Statistics = () => {
       </div>
 
       {/* New boxes with 2:3 and 1:3 ratio */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2 min-h-[420px] flex flex-col  h-1/3  bg-white/1 backdrop-blur-lg border border-white/20 p-6 rounded-2xl shadow-lg">
+      <div className="grid grid-cols-3 gap-4 h-[420px]">
+        <div className="col-span-2 h-[420px] flex flex-col   bg-white/1 backdrop-blur-lg border border-white/20 p-6 rounded-2xl shadow-lg">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-4">
               <h3 className="text-white text-lg font-semibold">
@@ -494,9 +517,31 @@ const Statistics = () => {
             )}
           </div>
         </div>
-        <div className="col-span-1 bg-gray-800 rounded-lg p-4 min-h-[420px] flex flex-col justify-center items-center">
-          <h3 className="text-white text-lg font-semibold">Box 6</h3>
-          <p className="text-gray-400">Statistics 6</p>
+        <div className="col-span-1 h-1/3 min-h-[420px] flex flex-col bg-white/1 backdrop-blur-lg border border-white/20 p-6 rounded-2xl shadow-lg">
+          <h3 className="text-white text-lg font-semibold mb-4">Weekly Overview</h3>
+          <div className="flex-1 overflow-auto">
+            {getWeeklyStats().map((stat, index) => (
+              <div key={stat.day} className="mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-400">{stat.day}</span>
+                  <span className="text-gray-300">{stat.count} transactions</span>
+                </div>
+                <div className="relative h-2 bg-gray-700 rounded-full">
+                  <div
+                    className="absolute h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                    style={{
+                      width: `${(stat.count / Math.max(...getWeeklyStats().map(s => s.count))) * 100}%`
+                    }}
+                  />
+                </div>
+                <div className="mt-1 text-right">
+                  <span className="text-sm text-gray-400">
+                    Rp {stat.amount.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

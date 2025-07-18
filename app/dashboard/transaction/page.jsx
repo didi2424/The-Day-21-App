@@ -43,6 +43,7 @@ const DashboardTransactionContent = ({
   setSelectedTransactionId,
 }) => {
   const { data: session } = useSession();
+  const [hideValues, setHideValues] = useState(true);  // Add this line
   const [totalCost, setTotalCost] = useState(0);
   const [paidTransactions, setPaidTransactions] = useState([]);
   const [unpaidTotal, setPaidTotal] = useState(0);
@@ -172,13 +173,21 @@ const DashboardTransactionContent = ({
         <Provider>
           {session?.user ? (
             <>
-              <div className="mb-8">
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                  Welcome {session?.user.name}
-                </h1>
-                <p className="mt-2 text-gray-400">
-                  Welcome to your transaction dashboard. Here's your overview:
-                </p>
+              <div className="mb-8 flex justify-between items-center">
+                <div>
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                    Welcome {session?.user.name}
+                  </h1>
+                  <p className="mt-2 text-gray-400">
+                    Welcome to your transaction dashboard. Here's your overview:
+                  </p>
+                </div>
+                <button
+                  onClick={() => setHideValues(!hideValues)}
+                  className="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-gray-300 text-sm"
+                >
+                  {hideValues ? 'Show Values' : 'Hide Values'}
+                </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -193,7 +202,7 @@ const DashboardTransactionContent = ({
                     <div className="flex justify-between items-center">
                       <span className="text-gray-400">Bruto</span>
                       <span className="text-2xl font-bold text-white">
-                        Rp {animatedTotal.toLocaleString()}
+                        {hideValues ? '••••••' : `Rp ${animatedTotal.toLocaleString()}`}
                       </span>
                     </div>
                   </div>
@@ -205,14 +214,14 @@ const DashboardTransactionContent = ({
                     <div className="flex justify-between items-center">
                       <span className="text-gray-400">Total Paid</span>
                       <span className="text-2xl font-bold text-green-400">
-                        Rp {animatedPaid.toLocaleString()}
+                        {hideValues ? '••••••' : `Rp ${animatedPaid.toLocaleString()}`}
                       </span>
                     </div>
                     <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
                     <div className="flex justify-between items-center">
                       <span className="text-gray-400">Unpaid Amount</span>
                       <span className="text-2xl font-bold text-red-400">
-                        Rp {animatedUnpaid.toLocaleString()}
+                        {hideValues ? '••••••' : `Rp ${animatedUnpaid.toLocaleString()}`}
                       </span>
                     </div>
                   </div>
@@ -242,22 +251,21 @@ const DashboardTransactionContent = ({
   }
 };
 
-// Update URL parameter handling in payments function
+
 function payments() {
   const [activeButton, setActiveButton] = useState(null);
   const [selectedTransactionId, setSelectedTransactionId] = useState(null);
 
-  // Handle query parameter on component mount
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const view = searchParams.get("view");
-    const id = searchParams.get("id"); // Changed from 'serviceId' to 'id'
+    const id = searchParams.get("id"); 
 
     if (view === "transaction") {
       setActiveButton("transaction");
-    } else if (id) { // Updated condition
+    } else if (id) { 
       setActiveButton("Transaction Details");
-      setSelectedTransactionId(id); // Using consistent naming
+      setSelectedTransactionId(id); 
     }
   }, []);
 
